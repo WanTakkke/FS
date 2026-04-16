@@ -6,7 +6,7 @@ from sqlalchemy.dialects.mysql import TINYINT
 
 from models.baseInfo import Base
 
-2
+
 class StudentInfo(Base):
     __tablename__ = "students"
 

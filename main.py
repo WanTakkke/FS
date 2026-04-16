@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from controller import studentController
+from controller import studentController, userController
 
 app = FastAPI()
 
@@ -18,6 +18,7 @@ app.add_middleware(
 
 #导入子路由
 app.include_router(studentController.stu_router)
+app.include_router(userController.user_router)
 
 
 @app.get("/")
