@@ -5,7 +5,7 @@ from models.studentInfo import StudentInfo
 from schema.studentSchema import StudentRequest
 
 
-async def get_student(db: AsyncSession, skip: int = 0, limit: int=10):
+async def get_student(db: AsyncSession, skip: int, limit):
     result = await db.execute(select(StudentInfo).offset(skip).limit(limit))
     return result.scalars().all()
 

@@ -5,7 +5,7 @@ from models.studentInfo import StudentInfo
 from schema.studentSchema import StudentRequest
 
 
-async def get_student(db: AsyncSession, page: int = 0, page_size: int=10):
+async def get_student(db: AsyncSession, page: int, page_size):
     skip = (page - 1) * page_size
     result = await studentMapper.get_student(db, skip, page_size)
     return result
