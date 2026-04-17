@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel, field_serializer, ConfigDict
+from pydantic import BaseModel, field_validator, ConfigDict
 
 
 
@@ -38,11 +38,15 @@ class StudentResponse(BaseModel):
     education_level: str | None = None
 
     #数据库返回的date类型，需要转换成字符串
-    @field_serializer('enrollment_date', 'graduation_date')
-    def serialize_dates(self, value: date | None) -> str | None:
+    # 使用 field_validator 在验证阶段转换日期
+    @field_validator('enrollment_date', 'graduation_date', mode='before')
+    @classmethod
+    def convert_dates(cls, value):
         if value is None:
             return None
-        return value.isoformat()
+        if isinstance(value, date):
+            return value.isoformat()
+        return value
 
 class StudentUpdateRequest(BaseModel):
     student_code: str  # 学生编号用于定位记录，必填
