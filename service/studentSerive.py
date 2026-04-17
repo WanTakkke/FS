@@ -35,3 +35,12 @@ async def create_student(db: AsyncSession, student_data: StudentRequest):
     result = await studentMapper.create_student(db, student)
     return result
 
+
+async def update_student(db: AsyncSession, student_data: StudentRequest):
+    # 先检查学生编号是否已存在
+    existing_student = await studentMapper.get_student_by_code(db, student_data.student_code)
+    if not existing_student:
+        raise ValueError(f"学生编号 {student_data.student_code} 不存在")
+
+    result = await studentMapper.update_student(db, student_data)
+    return result

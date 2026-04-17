@@ -24,3 +24,10 @@ async def add_student(student_data: StudentRequest, db: AsyncSession = Depends(g
     except ValueError as e:
         return BaseResponse.error(code=400, message=str(e))
 
+@stu_router.post("/update", response_model=BaseResponse[StudentResponse], description="修改学生信息")
+async def add_student(student_data: StudentRequest, db: AsyncSession = Depends(get_db)):
+    try:
+        result = await studentSerive.update_student(db, student_data)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        return BaseResponse.error(code=400, message=str(e))
