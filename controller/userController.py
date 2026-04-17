@@ -13,7 +13,7 @@ user_router = APIRouter(prefix="/api/user", tags=["用户模块"])
 async def register(user_data: UserRegisterRequest, db: AsyncSession = Depends(get_db)):
     try:
         result = await userService.register_user(db, user_data)
-        return BaseResponse.success(data=result)
+        return BaseResponse.success(message="注册成功")
     except ValueError as e:
         return BaseResponse.error(code=400, message=str(e))
 

@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class UserRegisterRequest(BaseModel):
@@ -25,6 +26,13 @@ class UserResponse(BaseModel):
     email: str | None = None
     is_active: int
     created_at: str | None = None
+
+    @field_validator('created_at', mode='before')
+    @classmethod
+    def convert_datetime(cls, v):
+        if isinstance(v, datetime):
+            return v.strftime('%Y-%m-%d %H:%M:%S')
+        return v
 
     @property
     def password(self):
