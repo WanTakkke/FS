@@ -2,16 +2,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from mapper import studentMapper
 from models.studentInfo import StudentInfo
-from schema.studentSchema import StudentRequest
+from schema.studentSchema import StudentResponse
 
 
 async def get_student(db: AsyncSession, page: int, page_size):
     skip = (page - 1) * page_size
     result = await studentMapper.get_student(db, skip, page_size)
-    return result
+    return [StudentResponse.model_validate(item) for item in result]
 
 
-async def create_student(db: AsyncSession, student_data: StudentRequest):
+async def create_student(db: AsyncSession, student_data):
     # 先检查学生编号是否已存在
     existing_student = await studentMapper.get_student_by_code(db, student_data.student_code)
     if existing_student:
@@ -33,14 +33,14 @@ async def create_student(db: AsyncSession, student_data: StudentRequest):
         education_level=student_data.education_level
     )
     result = await studentMapper.create_student(db, student)
-    return result
+    return StudentResponse.model_validate(result)
 
 
-async def update_student(db: AsyncSession, student_data: StudentRequest):
+async def update_student(db: AsyncSession, student_data):
     # 先检查学生编号是否已存在
     existing_student = await studentMapper.get_student_by_code(db, student_data.student_code)
     if not existing_student:
         raise ValueError(f"学生编号 {student_data.student_code} 不存在")
 
     result = await studentMapper.update_student(db, student_data)
-    return result
+    return StudentResponse.model_validate(result)

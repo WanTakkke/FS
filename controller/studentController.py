@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.baseResponse import BaseResponse
 from config.db_config import get_db
-from schema.studentSchema import StudentRequest, StudentResponse
+from schema.studentSchema import StudentRequest, StudentResponse, StudentUpdateRequest
 from service import studentSerive
 
 stu_router = APIRouter(prefix="/api/student", tags=["学生模块"])
@@ -25,7 +25,7 @@ async def add_student(student_data: StudentRequest, db: AsyncSession = Depends(g
         return BaseResponse.error(code=400, message=str(e))
 
 @stu_router.post("/update", response_model=BaseResponse[StudentResponse], description="修改学生信息")
-async def add_student(student_data: StudentRequest, db: AsyncSession = Depends(get_db)):
+async def update_student(student_data: StudentUpdateRequest, db: AsyncSession = Depends(get_db)):
     try:
         result = await studentSerive.update_student(db, student_data)
         return BaseResponse.success(data=result)

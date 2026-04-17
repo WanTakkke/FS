@@ -2,7 +2,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.studentInfo import StudentInfo
-from schema.studentSchema import StudentRequest
 
 
 async def get_student(db: AsyncSession, skip: int, limit):
@@ -23,7 +22,7 @@ async def create_student(db: AsyncSession, student: StudentInfo):
     return student
 
 
-async def update_student(db: AsyncSession, student_data: StudentRequest):
+async def update_student(db: AsyncSession, student_data):
     # 根据 student_code 查询现有学生
     existing_student = await get_student_by_code(db, student_data.student_code)
     if not existing_student:

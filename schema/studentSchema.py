@@ -1,5 +1,6 @@
 from datetime import date
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel, field_serializer, ConfigDict
+
 
 
 class StudentRequest(BaseModel):
@@ -18,6 +19,11 @@ class StudentRequest(BaseModel):
 
 
 class StudentResponse(BaseModel):
+
+    #允许 Pydantic 从 ORM 对象（如 SQLAlchemy 模型）
+    # 自动读取属性并进行序列化，这样 field_serializer 就会生效。
+    model_config = ConfigDict(from_attributes=True)
+
     student_code: str
     class_id: int
     advisor_id: int
