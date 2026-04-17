@@ -78,3 +78,68 @@ CREATE TABLE employments (
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) COMMENT '学生就业信息表';
+
+
+
+-- 1. 用户表
+CREATE TABLE `sys_user` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `username` VARCHAR(64) NOT NULL COMMENT '用户名',
+  `hashed_password` VARCHAR(128) NOT NULL COMMENT '密码哈希',
+  `email` VARCHAR(128) DEFAULT NULL COMMENT '邮箱',
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否启用: 1-启用, 0-禁用',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` DATETIME DEFAULT NULL COMMENT '删除时间，NULL表示未删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_username_deleted` (`username`, `deleted_at`) COMMENT '用户名唯一索引(兼容软删除)',
+  UNIQUE KEY `uk_email_deleted` (`email`, `deleted_at`) COMMENT '邮箱唯一索引(兼容软删除)',
+  KEY `idx_created_at` (`created_at`) COMMENT '按创建时间查询的辅助索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统用户表';
+
+-- 2. 角色表
+CREATE TABLE `sys_role` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `name` VARCHAR(64) NOT NULL COMMENT '角色显示名称(如: 超级管理员)',
+  `code` VARCHAR(64) NOT NULL COMMENT '角色编码(如: admin, user)',
+  `description` VARCHAR(255) DEFAULT NULL COMMENT '角色描述',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` DATETIME DEFAULT NULL COMMENT '删除时间，NULL表示未删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code_deleted` (`code`, `deleted_at`) COMMENT '角色编码唯一索引',
+  KEY `idx_name` (`name`) COMMENT '角色名称查询索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统角色表';
+
+-- 3. 权限表
+CREATE TABLE `sys_permission` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `parent_id` BIGINT DEFAULT NULL COMMENT '父级权限ID(用于菜单/权限树)',
+  `name` VARCHAR(64) NOT NULL COMMENT '权限显示名称(如: 创建用户)',
+  `code` VARCHAR(128) NOT NULL COMMENT '权限编码(如: user:create)',
+  `type` VARCHAR(32) NOT NULL COMMENT '权限类型(menu-菜单, button-按钮, api-接口)',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` DATETIME DEFAULT NULL COMMENT '删除时间，NULL表示未删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code_deleted` (`code`, `deleted_at`) COMMENT '权限编码唯一索引',
+  KEY `idx_parent_id` (`parent_id`) COMMENT '父节点查询索引'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统权限表';
+
+-- 4. 用户-角色关联表 (关系表无需软删除，直接硬删保证查询性能)
+CREATE TABLE `sys_user_role` (
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `role_id` BIGINT NOT NULL COMMENT '角色ID',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '授权时间',
+  PRIMARY KEY (`user_id`, `role_id`),
+  KEY `idx_role_id` (`role_id`) COMMENT '反向查询：通过角色查用户'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户-角色关联表';
+
+-- 5. 角色-权限关联表 (关系表无需软删除)
+CREATE TABLE `sys_role_permission` (
+  `role_id` BIGINT NOT NULL COMMENT '角色ID',
+  `permission_id` BIGINT NOT NULL COMMENT '权限ID',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '授权时间',
+  PRIMARY KEY (`role_id`, `permission_id`),
+  KEY `idx_permission_id` (`permission_id`) COMMENT '反向查询：通过权限查角色'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色-权限关联表';
