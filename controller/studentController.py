@@ -18,6 +18,9 @@ async def get_student(page: int = 1, page_size: int=10, db: AsyncSession = Depen
 
 @stu_router.post("/add", response_model=BaseResponse[StudentResponse], description="新增学生信息")
 async def add_student(student_data: StudentRequest, db: AsyncSession = Depends(get_db)):
-    result = await studentSerive.create_student(db, student_data)
-    return BaseResponse.success(data=result)
+    try:
+        result = await studentSerive.create_student(db, student_data)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        return BaseResponse.error(code=400, message=str(e))
 
