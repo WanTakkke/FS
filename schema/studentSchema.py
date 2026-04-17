@@ -38,4 +38,19 @@ class StudentResponse(BaseModel):
             return None
         return value.isoformat()
 
+class StudentUpdateRequest(BaseModel):
+    student_code: str  # 学生编号用于定位记录，必填
+    class_id: int | None = None
+    advisor_id: int | None = None
+    name: str | None = None
+    gender: int | None = None
+    age: int | None = None
+    hometown: str | None = None
+    graduate_school: str | None = None
+    major: str | None = None
+    enrollment_date: date | None = None
+    graduation_date: date | None = None
+    education_level: str | None = None
+
+
 

@@ -24,21 +24,17 @@ async def create_student(db: AsyncSession, student: StudentInfo):
 
 
 async def update_student(db: AsyncSession, student_data: StudentRequest):
-    # 1. 根据 student_code 查询现有学生
+    # 根据 student_code 查询现有学生
     existing_student = await get_student_by_code(db, student_data.student_code)
+    if not existing_student:
+        return None
 
-    # 2. 逐个更新字段（除了 id 和 student_code）
-    existing_student.class_id = student_data.class_id
-    existing_student.advisor_id = student_data.advisor_id
-    existing_student.name = student_data.name
-    existing_student.gender = student_data.gender
-    existing_student.age = student_data.age
-    existing_student.hometown = student_data.hometown
-    existing_student.graduate_school = student_data.graduate_school
-    existing_student.major = student_data.major
-    existing_student.enrollment_date = student_data.enrollment_date
-    existing_student.graduation_date = student_data.graduation_date
-    existing_student.education_level = student_data.education_level
+    # 只更新传入的非空字段
+    update_fields = student_data.model_dump(exclude_unset=True, exclude={'student_code'})
+
+    for field, value in update_fields.items():
+        if hasattr(existing_student, field):
+            setattr(existing_student, field, value)
 
     # 3. 提交并刷新
     await db.commit()
