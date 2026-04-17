@@ -18,6 +18,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
+#TODO：目前只完成了token的生成，但是token验证功能还未完成
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     # 限制密码长度
