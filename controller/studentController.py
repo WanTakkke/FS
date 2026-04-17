@@ -24,6 +24,7 @@ async def add_student(student_data: StudentRequest, db: AsyncSession = Depends(g
     except ValueError as e:
         return BaseResponse.error(code=400, message=str(e))
 
+
 @stu_router.post("/update", response_model=BaseResponse[StudentResponse], description="修改学生信息")
 async def update_student(student_data: StudentUpdateRequest, db: AsyncSession = Depends(get_db)):
     try:
@@ -31,3 +32,13 @@ async def update_student(student_data: StudentUpdateRequest, db: AsyncSession = 
         return BaseResponse.success(data=result)
     except ValueError as e:
         return BaseResponse.error(code=400, message=str(e))
+
+
+@stu_router.delete("/delete/{student_code}", response_model=BaseResponse[bool], description="删除学生信息")
+async def delete_student(student_code: str, db: AsyncSession = Depends(get_db)):
+    try:
+        await studentSerive.delete_student(db, student_code)
+        return BaseResponse.success()
+    except ValueError as e:
+        return BaseResponse.error(code=400, message=str(e))
+

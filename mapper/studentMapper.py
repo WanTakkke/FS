@@ -5,12 +5,12 @@ from models.studentInfo import StudentInfo
 
 
 async def get_student(db: AsyncSession, skip: int, limit):
-    result = await db.execute(select(StudentInfo).offset(skip).limit(limit))
+    result = await db.execute(select(StudentInfo).where(StudentInfo.is_deleted == 0).offset(skip).limit(limit))
     return result.scalars().all()
 
 
 async def get_student_by_code(db: AsyncSession, student_code: str):
-    result = await db.execute(select(StudentInfo).where(StudentInfo.student_code == student_code))
+    result = await db.execute(select(StudentInfo).where(StudentInfo.student_code == student_code).where(StudentInfo.is_deleted == 0))
     return result.scalar_one_or_none()
 
 
@@ -41,3 +41,16 @@ async def update_student(db: AsyncSession, student_data):
 
     # 4. 返回更新后的对象
     return existing_student
+
+
+async def delete_student(db: AsyncSession, student_code: str):
+    # 查询学生是否存在
+    existing_student = await get_student_by_code(db, student_code)
+    if not existing_student:
+        return False
+
+    # 删除记录
+    existing_student.is_deleted = 1
+    await db.commit()
+
+    return True

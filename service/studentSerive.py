@@ -44,3 +44,14 @@ async def update_student(db: AsyncSession, student_data):
 
     result = await studentMapper.update_student(db, student_data)
     return StudentResponse.model_validate(result)
+
+
+async def delete_student(db: AsyncSession, student_code: str):
+    # 先检查学生是否存在
+    existing_student = await studentMapper.get_student_by_code(db, student_code)
+    if not existing_student:
+        raise ValueError(f"学生编号 {student_code} 不存在")
+
+    # 执行删除
+    result = await studentMapper.delete_student(db, student_code)
+    return result
