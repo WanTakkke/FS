@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from controller import studentController, userController
+from utils.exception_handlers import register_exception_handlers
 
 app = FastAPI()
 
@@ -19,6 +20,9 @@ app.add_middleware(
 #导入子路由
 app.include_router(studentController.stu_router)
 app.include_router(userController.user_router)
+
+# 注册全局异常处理
+register_exception_handlers(app)
 
 
 @app.get("/")
