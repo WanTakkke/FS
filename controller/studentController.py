@@ -21,10 +21,7 @@ async def get_student(page: int = 1, page_size: int=10, db: AsyncSession = Depen
 
 
 @stu_router.post("/query/condition", response_model=BaseResponse[List[StudentResponse]], description="多条件查询学生信息")
-async def get_student_by_conditions(
-        query_params: StudentQueryRequest,
-        db: AsyncSession = Depends(get_db)
-):
+async def get_student_by_conditions(query_params: StudentQueryRequest, db: AsyncSession = Depends(get_db)):
     logger.info("学生多条件查询请求: params=%s", query_params.model_dump())
     result = await studentSerive.get_student_by_conditions(db, query_params)
     logger.info("学生多条件查询完成: count=%s", len(result))
