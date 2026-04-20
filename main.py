@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from controller import studentController, userController, classController
+from controller import studentController, userController, classController, scoreController
 from utils.exception_handlers import register_exception_handlers
 from utils.logger import AppLogger
 
@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(studentController.stu_router)
 app.include_router(userController.user_router)
 app.include_router(classController.class_router)
+app.include_router(scoreController.score_router)
 
 # 注册全局异常处理
 register_exception_handlers(app)
