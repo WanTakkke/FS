@@ -60,14 +60,17 @@ async def update_score(db: AsyncSession, score_data: ScoreUpdateRequest):
 
     update_fields = score_data.model_dump(exclude_unset=True, exclude={"id"})
 
-    target_student_id = update_fields.get("student_id", existing_score.student_id)
+    target_student_id = existing_score.student_id
     target_exam_sequence = update_fields.get("exam_sequence", existing_score.exam_sequence)
 
-    if "student_id" in update_fields:
-        student = await scoreMapper.get_student_by_id(db, update_fields["student_id"])
+    if "student_code" in update_fields:
+        student = await scoreMapper.get_student_by_code(db, update_fields["student_code"])
         if not student:
-            logger.warning("Service修改成绩失败: 学生不存在 student_id=%s", update_fields["student_id"])
-            raise ValueError(f"学生ID {update_fields['student_id']} 不存在")
+            logger.warning("Service修改成绩失败: 学生不存在 student_code=%s", update_fields["student_code"])
+            raise ValueError(f"学生编号 {update_fields['student_code']} 不存在")
+        target_student_id = student.id
+        update_fields["student_id"] = student.id
+        del update_fields["student_code"]
 
     duplicate = await scoreMapper.get_score_by_student_and_exam(db, target_student_id, target_exam_sequence)
     if duplicate and duplicate.id != score_data.id:
