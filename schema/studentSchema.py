@@ -64,6 +64,7 @@ class StudentUpdateRequest(BaseModel):
 
 
 class StudentQueryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")  # 禁止多余字段
     page: int = 1
     page_size: int = 10
     student_code: str | None = None
