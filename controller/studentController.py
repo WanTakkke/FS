@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.baseResponse import BaseResponse
 from config.db_config import get_db
-from schema.studentSchema import StudentRequest, StudentResponse, StudentUpdateRequest, StudentQueryRequest
+from schema.studentSchema import StudentRequest, StudentResponse, StudentUpdateRequest
 from service import studentSerive
 
 stu_router = APIRouter(prefix="/api/student", tags=["学生模块"])
@@ -13,15 +13,6 @@ stu_router = APIRouter(prefix="/api/student", tags=["学生模块"])
 @stu_router.get("/query", response_model=BaseResponse[List[StudentResponse]], description="查询学生信息")
 async def get_student(page: int = 1, page_size: int=10, db: AsyncSession = Depends(get_db)):
     result = await studentSerive.get_student(db, page, page_size)
-    return BaseResponse.success(data=result)
-
-
-@stu_router.post("/query/condition", response_model=BaseResponse[List[StudentResponse]], description="多条件查询学生信息")
-async def get_student_by_conditions(
-        query_params: StudentQueryRequest,
-        db: AsyncSession = Depends(get_db)
-):
-    result = await studentSerive.get_student_by_conditions(db, query_params)
     return BaseResponse.success(data=result)
 
 
