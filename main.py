@@ -3,8 +3,11 @@ from starlette.middleware.cors import CORSMiddleware
 
 from controller import studentController, userController
 from utils.exception_handlers import register_exception_handlers
+from utils.logger import AppLogger
 
 app = FastAPI()
+AppLogger.setup()
+logger = AppLogger.get_logger(__name__)
 
 # 配置CORS
 app.add_middleware(
@@ -27,6 +30,7 @@ register_exception_handlers(app)
 
 @app.get("/")
 async def root():
+    logger.info("访问根路径")
     return {"message": "Hello World"}
 
 
