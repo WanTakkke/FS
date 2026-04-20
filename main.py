@@ -6,6 +6,8 @@ from utils.exception_handlers import register_exception_handlers
 from utils.logger import AppLogger
 
 app = FastAPI()
+
+# 初始化日志
 AppLogger.setup()
 logger = AppLogger.get_logger(__name__)
 
