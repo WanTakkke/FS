@@ -51,6 +51,16 @@ class AppLogger:
         )
         file_handler.setFormatter(formatter)
         file_handler.suffix = "%Y-%m-%d"
+
+        base_name = Path(log_filename).stem
+
+        def _namer(default_name: str) -> str:
+            # default_name 形如: app.log.2026-04-19
+            file_path = Path(default_name)
+            date_part = file_path.name.split(".")[-1]
+            return str(file_path.with_name(f"{base_name}-{date_part}.log"))
+
+        file_handler.namer = _namer
         logger.addHandler(file_handler)
 
         # 初始化完成

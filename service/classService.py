@@ -41,10 +41,18 @@ async def create_class(db: AsyncSession, class_data: ClassRequest):
         logger.warning("Service新增班级失败: 班级编号已存在 class_code=%s", class_data.class_code)
         raise ValueError(f"班级编号 {class_data.class_code} 已存在")
 
+    teacher = await classMapper.get_teacher_by_name(db, class_data.homeroom_teacher)
+    if not teacher:
+        logger.warning(
+            "Service新增班级失败: 班主任不存在 name=%s",
+            class_data.homeroom_teacher
+        )
+        raise ValueError(f"班主任 {class_data.homeroom_teacher} 不存在")
+
     class_info = ClassInfo(
         class_code=class_data.class_code,
         start_date=class_data.start_date,
-        head_teacher_id=class_data.head_teacher_id
+        head_teacher_id=teacher.id
     )
     await classMapper.create_class(db, class_info)
     result = await classMapper.get_class_detail_with_teacher(db, class_data.class_code)
@@ -59,7 +67,19 @@ async def update_class(db: AsyncSession, class_data: ClassUpdateRequest):
         logger.warning("Service修改班级失败: 班级不存在 class_code=%s", class_data.class_code)
         raise ValueError(f"班级编号 {class_data.class_code} 不存在")
 
-    await classMapper.update_class(db, class_data)
+    update_fields = class_data.model_dump(exclude_unset=True, exclude={"class_code", "homeroom_teacher"})
+
+    if class_data.homeroom_teacher is not None:
+        teacher = await classMapper.get_teacher_by_name(db, class_data.homeroom_teacher)
+        if not teacher:
+            logger.warning(
+                "Service修改班级失败: 班主任不存在 name=%s",
+                class_data.homeroom_teacher
+            )
+            raise ValueError(f"班主任 {class_data.homeroom_teacher} 不存在")
+        update_fields["head_teacher_id"] = teacher.id
+
+    await classMapper.update_class(db, class_data.class_code, update_fields)
     result = await classMapper.get_class_detail_with_teacher(db, class_data.class_code)
     logger.info("Service修改班级成功: class_code=%s", class_data.class_code)
     return ClassResponse.model_validate(result)

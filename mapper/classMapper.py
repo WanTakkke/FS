@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.classInfo import ClassInfo
 from models.teacherInfo import TeacherInfo
-from schema.classSchema import ClassUpdateRequest, ClassQueryRequest
+from schema.classSchema import ClassQueryRequest
 from utils.logger import AppLogger
 
 logger = AppLogger.get_logger(__name__)
@@ -50,8 +50,8 @@ async def get_class_by_conditions(db: AsyncSession, query_params: ClassQueryRequ
 
     if query_params.class_code:
         stmt = stmt.where(ClassInfo.class_code == query_params.class_code)
-    if query_params.head_teacher_id is not None:
-        stmt = stmt.where(ClassInfo.head_teacher_id == query_params.head_teacher_id)
+    if query_params.homeroom_teacher:
+        stmt = stmt.where(TeacherInfo.name.like(f"%{query_params.homeroom_teacher}%"))
     if query_params.start_date_start:
         stmt = stmt.where(ClassInfo.start_date >= query_params.start_date_start)
     if query_params.start_date_end:
@@ -70,6 +70,16 @@ async def get_class_by_code(db: AsyncSession, class_code: str):
     )
     data = result.scalar_one_or_none()
     logger.info("Mapper按编号查询班级完成: exists=%s", data is not None)
+    return data
+
+
+async def get_teacher_by_name(db: AsyncSession, teacher_name: str):
+    logger.info("Mapper按姓名查询老师: name=%s", teacher_name)
+    result = await db.execute(
+        select(TeacherInfo).where(TeacherInfo.name == teacher_name).where(TeacherInfo.is_deleted == 0)
+    )
+    data = result.scalar_one_or_none()
+    logger.info("Mapper按姓名查询老师完成: exists=%s", data is not None)
     return data
 
 
@@ -108,14 +118,13 @@ async def create_class(db: AsyncSession, class_info: ClassInfo):
         raise
 
 
-async def update_class(db: AsyncSession, class_data: ClassUpdateRequest):
-    logger.info("Mapper修改班级: class_code=%s", class_data.class_code)
-    existing_class = await get_class_by_code(db, class_data.class_code)
+async def update_class(db: AsyncSession, class_code: str, update_fields: dict):
+    logger.info("Mapper修改班级: class_code=%s", class_code)
+    existing_class = await get_class_by_code(db, class_code)
     if not existing_class:
-        logger.warning("Mapper修改班级失败: 班级不存在 class_code=%s", class_data.class_code)
+        logger.warning("Mapper修改班级失败: 班级不存在 class_code=%s", class_code)
         return None
 
-    update_fields = class_data.model_dump(exclude_unset=True, exclude={"class_code"})
     for field, value in update_fields.items():
         if hasattr(existing_class, field):
             setattr(existing_class, field, value)
@@ -123,11 +132,11 @@ async def update_class(db: AsyncSession, class_data: ClassUpdateRequest):
     try:
         await db.commit()
         await db.refresh(existing_class)
-        logger.info("Mapper修改班级成功: class_code=%s", class_data.class_code)
+        logger.info("Mapper修改班级成功: class_code=%s", class_code)
         return existing_class
     except Exception:
         await db.rollback()
-        logger.exception("Mapper修改班级异常: class_code=%s", class_data.class_code)
+        logger.exception("Mapper修改班级异常: class_code=%s", class_code)
         raise
 
 

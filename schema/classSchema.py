@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, field_validator, Field, model_valida
 class ClassRequest(BaseModel):
     class_code: str
     start_date: date
-    head_teacher_id: int | None = None
+    homeroom_teacher: str
 
 
 class ClassResponse(BaseModel):
@@ -29,7 +29,7 @@ class ClassResponse(BaseModel):
 class ClassUpdateRequest(BaseModel):
     class_code: str
     start_date: date | None = None
-    head_teacher_id: int | None = None
+    homeroom_teacher: str | None = None
 
 
 class ClassQueryRequest(BaseModel):
@@ -38,7 +38,7 @@ class ClassQueryRequest(BaseModel):
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=10, ge=1, le=100)
     class_code: str | None = None
-    head_teacher_id: int | None = None
+    homeroom_teacher: str | None = None
     start_date_start: date | None = None
     start_date_end: date | None = None
 
