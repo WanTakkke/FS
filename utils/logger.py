@@ -14,9 +14,11 @@ class AppLogger:
             log_dir: str | None = None,
             log_filename: str = "app.log"
     ):
+        # 初始化
         if cls._initialized:
             return
 
+        # 日志目录
         if log_dir is None:
             project_root = Path(__file__).resolve().parent.parent
             log_path = project_root / "logs"
@@ -24,18 +26,22 @@ class AppLogger:
             log_path = Path(log_dir)
         log_path.mkdir(parents=True, exist_ok=True)
 
+        # 日志器
         logger = logging.getLogger(cls._logger_name)
         logger.setLevel(level)
         logger.propagate = False
 
+        # 日志格式
         formatter = logging.Formatter(
             "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
         )
 
+        # 控制台日志
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
 
+        # 文件日志
         file_handler = TimedRotatingFileHandler(
             filename=str(log_path / log_filename),
             when="midnight",
@@ -47,6 +53,7 @@ class AppLogger:
         file_handler.suffix = "%Y-%m-%d"
         logger.addHandler(file_handler)
 
+        # 初始化完成
         cls._initialized = True
 
     @classmethod
