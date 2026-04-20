@@ -143,3 +143,58 @@ CREATE TABLE `sys_role_permission` (
   PRIMARY KEY (`role_id`, `permission_id`),
   KEY `idx_permission_id` (`permission_id`) COMMENT '反向查询：通过权限查角色'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色-权限关联表';
+
+
+
+
+-- =========================================
+-- 1) 新增课程表 courses
+-- =========================================
+CREATE TABLE IF NOT EXISTS `courses` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `course_code` VARCHAR(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '课程编码(业务唯一)',
+  `course_name` VARCHAR(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '课程名称',
+  `description` VARCHAR(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '课程描述',
+  `is_deleted` TINYINT(1) DEFAULT '0' COMMENT '逻辑删除标志',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_courses_course_code` (`course_code`),
+  KEY `idx_courses_name` (`course_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='课程表';
+
+
+-- =========================================
+-- 2) 给班级授课表增加 course_id
+-- =========================================
+ALTER TABLE `class_teaching_periods`
+  ADD COLUMN `course_id` BIGINT NOT NULL COMMENT '课程ID (逻辑关联 courses.id)' AFTER `lecturer_id`;
+
+
+-- =========================================
+-- 3) 补索引（提升查询性能）
+-- =========================================
+ALTER TABLE `class_teaching_periods`
+  ADD KEY `idx_ctp_class_id` (`class_id`),
+  ADD KEY `idx_ctp_lecturer_id` (`lecturer_id`),
+  ADD KEY `idx_ctp_course_id` (`course_id`),
+  ADD KEY `idx_ctp_start_date` (`start_date`),
+  ADD KEY `idx_ctp_end_date` (`end_date`);
+
+
+-- =========================================
+-- 4) 业务唯一约束（防止重复周期）
+-- 同一班级+老师+课程+开始日期 只允许一条
+-- =========================================
+ALTER TABLE `class_teaching_periods`
+  ADD UNIQUE KEY `uk_ctp_business` (`class_id`, `lecturer_id`, `course_id`, `start_date`);
+
+
+-- =========================================
+-- 5) （可选）外键约束
+-- 若你希望数据库层强约束再开启；否则保留“逻辑关联”即可
+-- =========================================
+-- ALTER TABLE `class_teaching_periods`
+--   ADD CONSTRAINT `fk_ctp_class_id` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`),
+--   ADD CONSTRAINT `fk_ctp_lecturer_id` FOREIGN KEY (`lecturer_id`) REFERENCES `teachers` (`id`),
+--   ADD CONSTRAINT `fk_ctp_course_id` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`);
