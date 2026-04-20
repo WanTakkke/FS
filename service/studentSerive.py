@@ -11,6 +11,12 @@ async def get_student(db: AsyncSession, page: int, page_size):
     return [StudentResponse.model_validate(item) for item in result]
 
 
+async def get_student_by_conditions(db: AsyncSession, query_params):
+    skip = (query_params.page - 1) * query_params.page_size
+    result = await studentMapper.get_student_by_conditions(db, query_params, skip, query_params.page_size)
+    return [StudentResponse.model_validate(item) for item in result]
+
+
 async def create_student(db: AsyncSession, student_data):
     # 先检查学生编号是否已存在
     existing_student = await studentMapper.get_student_by_code(db, student_data.student_code)

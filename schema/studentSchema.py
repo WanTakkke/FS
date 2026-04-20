@@ -63,4 +63,23 @@ class StudentUpdateRequest(BaseModel):
     education_level: str | None = None
 
 
+class StudentQueryRequest(BaseModel):
+    page: int = 1
+    page_size: int = 10
+    student_code: str | None = None
+    name: str | None = None
+    class_id: int | None = None
+    advisor_id: int | None = None
+    gender: int | None = None
+    age_min: int | None = None
+    age_max: int | None = None
+    hometown: str | None = None
+    graduate_school: str | None = None
+    major: str | None = None
+    education_level: str | None = None
+    enrollment_start_date: date | None = None
+    enrollment_end_date: date | None = None
+    graduation_start_date: date | None = None
+    graduation_end_date: date | None = None
+
 

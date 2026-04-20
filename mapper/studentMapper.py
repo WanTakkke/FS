@@ -9,6 +9,45 @@ async def get_student(db: AsyncSession, skip: int, limit):
     return result.scalars().all()
 
 
+async def get_student_by_conditions(db: AsyncSession, query_params, skip: int, limit: int):
+    stmt = select(StudentInfo).where(StudentInfo.is_deleted == 0)
+
+    if query_params.student_code:
+        stmt = stmt.where(StudentInfo.student_code == query_params.student_code)
+    if query_params.name:
+        stmt = stmt.where(StudentInfo.name.like(f"%{query_params.name}%"))
+    if query_params.class_id is not None:
+        stmt = stmt.where(StudentInfo.class_id == query_params.class_id)
+    if query_params.advisor_id is not None:
+        stmt = stmt.where(StudentInfo.advisor_id == query_params.advisor_id)
+    if query_params.gender is not None:
+        stmt = stmt.where(StudentInfo.gender == query_params.gender)
+    if query_params.age_min is not None:
+        stmt = stmt.where(StudentInfo.age >= query_params.age_min)
+    if query_params.age_max is not None:
+        stmt = stmt.where(StudentInfo.age <= query_params.age_max)
+    if query_params.hometown:
+        stmt = stmt.where(StudentInfo.hometown.like(f"%{query_params.hometown}%"))
+    if query_params.graduate_school:
+        stmt = stmt.where(StudentInfo.graduate_school.like(f"%{query_params.graduate_school}%"))
+    if query_params.major:
+        stmt = stmt.where(StudentInfo.major.like(f"%{query_params.major}%"))
+    if query_params.education_level:
+        stmt = stmt.where(StudentInfo.education_level == query_params.education_level)
+    if query_params.enrollment_start_date:
+        stmt = stmt.where(StudentInfo.enrollment_date >= query_params.enrollment_start_date)
+    if query_params.enrollment_end_date:
+        stmt = stmt.where(StudentInfo.enrollment_date <= query_params.enrollment_end_date)
+    if query_params.graduation_start_date:
+        stmt = stmt.where(StudentInfo.graduation_date >= query_params.graduation_start_date)
+    if query_params.graduation_end_date:
+        stmt = stmt.where(StudentInfo.graduation_date <= query_params.graduation_end_date)
+
+    stmt = stmt.offset(skip).limit(limit)
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
 async def get_student_by_code(db: AsyncSession, student_code: str):
     result = await db.execute(select(StudentInfo).where(StudentInfo.student_code == student_code).where(StudentInfo.is_deleted == 0))
     return result.scalar_one_or_none()
