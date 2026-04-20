@@ -2,14 +2,21 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.studentInfo import StudentInfo
+from utils.logger import AppLogger
+
+logger = AppLogger.get_logger(__name__)
 
 
 async def get_student(db: AsyncSession, skip: int, limit):
+    logger.info("Mapper学生分页查询: skip=%s, limit=%s", skip, limit)
     result = await db.execute(select(StudentInfo).where(StudentInfo.is_deleted == 0).offset(skip).limit(limit))
-    return result.scalars().all()
+    data = result.scalars().all()
+    logger.info("Mapper学生分页查询完成: count=%s", len(data))
+    return data
 
 
 async def get_student_by_conditions(db: AsyncSession, query_params, skip: int, limit: int):
+    logger.info("Mapper学生多条件查询: skip=%s, limit=%s", skip, limit)
     stmt = select(StudentInfo).where(StudentInfo.is_deleted == 0)
 
     if query_params.student_code:
@@ -45,26 +52,35 @@ async def get_student_by_conditions(db: AsyncSession, query_params, skip: int, l
 
     stmt = stmt.offset(skip).limit(limit)
     result = await db.execute(stmt)
-    return result.scalars().all()
+    data = result.scalars().all()
+    logger.info("Mapper学生多条件查询完成: count=%s", len(data))
+    return data
 
 
 async def get_student_by_code(db: AsyncSession, student_code: str):
+    logger.info("Mapper按编号查询学生: student_code=%s", student_code)
     result = await db.execute(select(StudentInfo).where(StudentInfo.student_code == student_code).where(StudentInfo.is_deleted == 0))
-    return result.scalar_one_or_none()
+    data = result.scalar_one_or_none()
+    logger.info("Mapper按编号查询完成: exists=%s", data is not None)
+    return data
 
 
 async def create_student(db: AsyncSession, student: StudentInfo):
+    logger.info("Mapper新增学生: student_code=%s", student.student_code)
     db.add(student)
     await db.commit()
     await db.refresh(student)
+    logger.info("Mapper新增学生成功: student_code=%s", student.student_code)
     #返回StudentInfo 模型对象,orm模型对象
     return student
 
 
 async def update_student(db: AsyncSession, student_data):
+    logger.info("Mapper修改学生: student_code=%s", student_data.student_code)
     # 根据 student_code 查询现有学生
     existing_student = await get_student_by_code(db, student_data.student_code)
     if not existing_student:
+        logger.warning("Mapper修改学生失败: 学生不存在 student_code=%s", student_data.student_code)
         return None
 
     # 只更新传入的非空字段
@@ -77,19 +93,23 @@ async def update_student(db: AsyncSession, student_data):
     # 3. 提交并刷新
     await db.commit()
     await db.refresh(existing_student)
+    logger.info("Mapper修改学生成功: student_code=%s", student_data.student_code)
 
     # 4. 返回更新后的对象
     return existing_student
 
 
 async def delete_student(db: AsyncSession, student_code: str):
+    logger.info("Mapper删除学生: student_code=%s", student_code)
     # 查询学生是否存在
     existing_student = await get_student_by_code(db, student_code)
     if not existing_student:
+        logger.warning("Mapper删除学生失败: 学生不存在 student_code=%s", student_code)
         return False
 
     # 删除记录
     existing_student.is_deleted = 1
     await db.commit()
+    logger.info("Mapper删除学生成功: student_code=%s", student_code)
 
     return True
