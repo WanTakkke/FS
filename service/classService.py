@@ -26,7 +26,7 @@ async def get_class_by_conditions(db: AsyncSession, query_params: ClassQueryRequ
 
 async def get_class_detail(db: AsyncSession, class_code: str):
     logger.info("Service班级详情查询: class_code=%s", class_code)
-    result = await classMapper.get_class_by_code(db, class_code)
+    result = await classMapper.get_class_detail_with_teacher(db, class_code)
     if not result:
         logger.warning("Service班级详情查询失败: 班级不存在 class_code=%s", class_code)
         raise ValueError(f"班级编号 {class_code} 不存在")
@@ -46,7 +46,8 @@ async def create_class(db: AsyncSession, class_data: ClassRequest):
         start_date=class_data.start_date,
         head_teacher_id=class_data.head_teacher_id
     )
-    result = await classMapper.create_class(db, class_info)
+    await classMapper.create_class(db, class_info)
+    result = await classMapper.get_class_detail_with_teacher(db, class_data.class_code)
     logger.info("Service新增班级成功: class_code=%s", class_data.class_code)
     return ClassResponse.model_validate(result)
 
@@ -58,7 +59,8 @@ async def update_class(db: AsyncSession, class_data: ClassUpdateRequest):
         logger.warning("Service修改班级失败: 班级不存在 class_code=%s", class_data.class_code)
         raise ValueError(f"班级编号 {class_data.class_code} 不存在")
 
-    result = await classMapper.update_class(db, class_data)
+    await classMapper.update_class(db, class_data)
+    result = await classMapper.get_class_detail_with_teacher(db, class_data.class_code)
     logger.info("Service修改班级成功: class_code=%s", class_data.class_code)
     return ClassResponse.model_validate(result)
 
@@ -73,4 +75,3 @@ async def delete_class(db: AsyncSession, class_code: str):
     result = await classMapper.delete_class(db, class_code)
     logger.info("Service删除班级成功: class_code=%s", class_code)
     return result
-

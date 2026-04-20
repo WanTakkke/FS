@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.classInfo import ClassInfo
+from models.teacherInfo import TeacherInfo
 from schema.classSchema import ClassUpdateRequest, ClassQueryRequest
 from utils.logger import AppLogger
 
@@ -10,17 +11,42 @@ logger = AppLogger.get_logger(__name__)
 
 async def get_class(db: AsyncSession, skip: int, limit: int):
     logger.info("Mapper班级分页查询: skip=%s, limit=%s", skip, limit)
-    result = await db.execute(
-        select(ClassInfo).where(ClassInfo.is_deleted == 0).offset(skip).limit(limit)
+    stmt = (
+        select(
+            ClassInfo.class_code,
+            ClassInfo.start_date,
+            TeacherInfo.name.label("homeroom_teacher")
+        )
+        .select_from(ClassInfo)
+        .outerjoin(
+            TeacherInfo,
+            (ClassInfo.head_teacher_id == TeacherInfo.id) & (TeacherInfo.is_deleted == 0)
+        )
+        .where(ClassInfo.is_deleted == 0)
+        .offset(skip)
+        .limit(limit)
     )
-    data = result.scalars().all()
+    result = await db.execute(stmt)
+    data = result.mappings().all()
     logger.info("Mapper班级分页查询完成: count=%s", len(data))
     return data
 
 
 async def get_class_by_conditions(db: AsyncSession, query_params: ClassQueryRequest, skip: int, limit: int):
     logger.info("Mapper班级多条件查询: skip=%s, limit=%s", skip, limit)
-    stmt = select(ClassInfo).where(ClassInfo.is_deleted == 0)
+    stmt = (
+        select(
+            ClassInfo.class_code,
+            ClassInfo.start_date,
+            TeacherInfo.name.label("homeroom_teacher")
+        )
+        .select_from(ClassInfo)
+        .outerjoin(
+            TeacherInfo,
+            (ClassInfo.head_teacher_id == TeacherInfo.id) & (TeacherInfo.is_deleted == 0)
+        )
+        .where(ClassInfo.is_deleted == 0)
+    )
 
     if query_params.class_code:
         stmt = stmt.where(ClassInfo.class_code == query_params.class_code)
@@ -32,7 +58,7 @@ async def get_class_by_conditions(db: AsyncSession, query_params: ClassQueryRequ
         stmt = stmt.where(ClassInfo.start_date <= query_params.start_date_end)
 
     result = await db.execute(stmt.offset(skip).limit(limit))
-    data = result.scalars().all()
+    data = result.mappings().all()
     logger.info("Mapper班级多条件查询完成: count=%s", len(data))
     return data
 
@@ -44,6 +70,27 @@ async def get_class_by_code(db: AsyncSession, class_code: str):
     )
     data = result.scalar_one_or_none()
     logger.info("Mapper按编号查询班级完成: exists=%s", data is not None)
+    return data
+
+
+async def get_class_detail_with_teacher(db: AsyncSession, class_code: str):
+    logger.info("Mapper按编号查询班级详情(含班主任): class_code=%s", class_code)
+    stmt = (
+        select(
+            ClassInfo.class_code,
+            ClassInfo.start_date,
+            TeacherInfo.name.label("homeroom_teacher")
+        )
+        .select_from(ClassInfo)
+        .outerjoin(
+            TeacherInfo,
+            (ClassInfo.head_teacher_id == TeacherInfo.id) & (TeacherInfo.is_deleted == 0)
+        )
+        .where(ClassInfo.is_deleted == 0, ClassInfo.class_code == class_code)
+    )
+    result = await db.execute(stmt)
+    data = result.mappings().first()
+    logger.info("Mapper按编号查询班级详情完成: exists=%s", data is not None)
     return data
 
 

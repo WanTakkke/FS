@@ -14,7 +14,7 @@ class ClassResponse(BaseModel):
 
     class_code: str
     start_date: str
-    head_teacher_id: int | None = None
+    homeroom_teacher: str | None = None
 
     @field_validator("start_date", mode="before")
     @classmethod
