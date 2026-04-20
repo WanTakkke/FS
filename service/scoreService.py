@@ -52,37 +52,36 @@ async def create_score(db: AsyncSession, score_data: ScoreRequest):
 
 
 async def update_score(db: AsyncSession, score_data: ScoreUpdateRequest):
-    logger.info("Service修改成绩: id=%s", score_data.id)
-    existing_score = await scoreMapper.get_score_by_id(db, score_data.id)
+    logger.info(
+        "Service修改成绩: student_code=%s, exam_sequence=%s",
+        score_data.student_code,
+        score_data.exam_sequence
+    )
+
+    student = await scoreMapper.get_student_by_code(db, score_data.student_code)
+    if not student:
+        logger.warning("Service修改成绩失败: 学生不存在 student_code=%s", score_data.student_code)
+        raise ValueError(f"学生编号 {score_data.student_code} 不存在")
+
+    existing_score = await scoreMapper.get_score_by_student_and_exam(
+        db, student.id, score_data.exam_sequence
+    )
     if not existing_score:
-        logger.warning("Service修改成绩失败: 记录不存在 id=%s", score_data.id)
-        raise ValueError(f"成绩ID {score_data.id} 不存在")
-
-    update_fields = score_data.model_dump(exclude_unset=True, exclude={"id"})
-
-    target_student_id = existing_score.student_id
-    target_exam_sequence = update_fields.get("exam_sequence", existing_score.exam_sequence)
-
-    if "student_code" in update_fields:
-        student = await scoreMapper.get_student_by_code(db, update_fields["student_code"])
-        if not student:
-            logger.warning("Service修改成绩失败: 学生不存在 student_code=%s", update_fields["student_code"])
-            raise ValueError(f"学生编号 {update_fields['student_code']} 不存在")
-        target_student_id = student.id
-        update_fields["student_id"] = student.id
-        del update_fields["student_code"]
-
-    duplicate = await scoreMapper.get_score_by_student_and_exam(db, target_student_id, target_exam_sequence)
-    if duplicate and duplicate.id != score_data.id:
         logger.warning(
-            "Service修改成绩失败: 成绩记录冲突 student_id=%s, exam_sequence=%s",
-            target_student_id, target_exam_sequence
+            "Service修改成绩失败: 成绩记录不存在 student_code=%s, exam_sequence=%s",
+            score_data.student_code,
+            score_data.exam_sequence
         )
-        raise ValueError(f"学生ID {target_student_id} 的 {target_exam_sequence} 成绩已存在")
+        raise ValueError(f"学生编号 {score_data.student_code} 的 {score_data.exam_sequence} 成绩不存在")
 
-    await scoreMapper.update_score(db, score_data.id, update_fields)
-    result = await scoreMapper.get_score_detail_with_student(db, score_data.id)
-    logger.info("Service修改成绩成功: id=%s", score_data.id)
+    update_fields = {"score": score_data.score}
+    await scoreMapper.update_score(db, existing_score.id, update_fields)
+    result = await scoreMapper.get_score_detail_with_student(db, existing_score.id)
+    logger.info(
+        "Service修改成绩成功: student_code=%s, exam_sequence=%s",
+        score_data.student_code,
+        score_data.exam_sequence
+    )
     return ScoreResponse.model_validate(result)
 
 
@@ -95,4 +94,25 @@ async def delete_score(db: AsyncSession, score_id: int):
 
     result = await scoreMapper.delete_score(db, score_id)
     logger.info("Service删除成绩成功: id=%s", score_id)
+    return result
+
+
+async def delete_score_by_student_and_exam(db: AsyncSession, student_code: str, exam_sequence: str):
+    logger.info("Service删除成绩: student_code=%s, exam_sequence=%s", student_code, exam_sequence)
+
+    student = await scoreMapper.get_student_by_code(db, student_code)
+    if not student:
+        logger.warning("Service删除成绩失败: 学生不存在 student_code=%s", student_code)
+        raise ValueError(f"学生编号 {student_code} 不存在")
+
+    existing_score = await scoreMapper.get_score_by_student_and_exam(db, student.id, exam_sequence)
+    if not existing_score:
+        logger.warning(
+            "Service删除成绩失败: 成绩记录不存在 student_code=%s, exam_sequence=%s",
+            student_code, exam_sequence
+        )
+        raise ValueError(f"学生编号 {student_code} 的 {exam_sequence} 成绩不存在")
+
+    result = await scoreMapper.delete_score(db, existing_score.id)
+    logger.info("Service删除成绩成功: student_code=%s, exam_sequence=%s", student_code, exam_sequence)
     return result

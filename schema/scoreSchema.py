@@ -26,10 +26,9 @@ class ScoreResponse(BaseModel):
 
 
 class ScoreUpdateRequest(BaseModel):
-    id: int
-    student_code: str | None = None
-    exam_sequence: str | None = None
-    score: Decimal | None = Field(default=None, ge=0, le=100)
+    student_code: str
+    exam_sequence: str
+    score: Decimal = Field(ge=0, le=100)
 
 
 class ScoreQueryRequest(BaseModel):
