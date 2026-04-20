@@ -41,7 +41,6 @@ class ClassQueryRequest(BaseModel):
     head_teacher_id: int | None = None
     start_date_start: date | None = None
     start_date_end: date | None = None
-    keyword: str | None = None
 
     @model_validator(mode="after")
     def validate_date_range(self):

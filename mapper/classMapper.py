@@ -1,4 +1,4 @@
-from sqlalchemy import select, or_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.classInfo import ClassInfo
@@ -30,8 +30,6 @@ async def get_class_by_conditions(db: AsyncSession, query_params: ClassQueryRequ
         stmt = stmt.where(ClassInfo.start_date >= query_params.start_date_start)
     if query_params.start_date_end:
         stmt = stmt.where(ClassInfo.start_date <= query_params.start_date_end)
-    if query_params.keyword:
-        stmt = stmt.where(or_(ClassInfo.class_code.like(f"%{query_params.keyword}%")))
 
     result = await db.execute(stmt.offset(skip).limit(limit))
     data = result.scalars().all()
@@ -102,4 +100,3 @@ async def delete_class(db: AsyncSession, class_code: str):
         await db.rollback()
         logger.exception("Mapper删除班级异常: class_code=%s", class_code)
         raise
-
