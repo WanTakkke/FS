@@ -24,6 +24,14 @@ env/
 tmp/
 temp/
 
+# 前端依赖与构建产物
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+
 # PyCharm / IDEA 配置
 .idea
 *.iml
