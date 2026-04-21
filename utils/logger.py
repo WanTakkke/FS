@@ -10,7 +10,7 @@ class AppLogger:
     @classmethod
     def setup(
             cls,
-            level: int = logging.INFO,
+            level: int | str = logging.INFO,
             log_dir: str | None = None,
             log_filename: str = "app.log"
     ):
@@ -26,9 +26,17 @@ class AppLogger:
             log_path = Path(log_dir)
         log_path.mkdir(parents=True, exist_ok=True)
 
+        # 统一日志级别类型，便于类型检查
+        normalized_level: int
+        if isinstance(level, str):
+            parsed_level = logging.getLevelName(level.upper())
+            normalized_level = parsed_level if isinstance(parsed_level, int) else logging.INFO
+        else:
+            normalized_level = level
+
         # 日志器
         logger = logging.getLogger(cls._logger_name)
-        logger.setLevel(level)
+        logger.setLevel(normalized_level)
         logger.propagate = False
 
         # 日志格式
@@ -62,6 +70,13 @@ class AppLogger:
 
         file_handler.namer = _namer
         logger.addHandler(file_handler)
+
+        logger.info(
+            "日志系统初始化完成: level=%s, log_dir=%s, log_file=%s",
+            logging.getLevelName(normalized_level),
+            str(log_path),
+            log_filename
+        )
 
         # 初始化完成
         cls._initialized = True

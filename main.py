@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
@@ -5,21 +8,39 @@ from controller import studentController, userController, classController, score
 from utils.exception_handlers import register_exception_handlers
 from utils.logger import AppLogger
 
+load_dotenv()
+
 app = FastAPI()
 
 # 初始化日志
-AppLogger.setup()
+log_level = os.getenv("LOG_LEVEL", "INFO")
+log_dir = os.getenv("LOG_DIR")
+log_filename = os.getenv("LOG_FILENAME", "app.log")
+AppLogger.setup(level=log_level, log_dir=log_dir, log_filename=log_filename)
 logger = AppLogger.get_logger(__name__)
+
+# 注册全局异常处理
+register_exception_handlers(app)
+
+
+def _parse_cors_allow_origins() -> list[str]:
+    raw_value = os.getenv("CORS_ALLOW_ORIGINS", "*")
+    if not raw_value.strip():
+        return ["*"]
+    origins = [item.strip() for item in raw_value.split(",") if item.strip()]
+    return origins or ["*"]
+
+
+cors_allow_origins = _parse_cors_allow_origins()
+logger.info("CORS配置加载完成: allow_origins=%s", cors_allow_origins)
 
 # 配置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允许所有HTTP地址访问
+    allow_origins=cors_allow_origins,
     allow_credentials=True,  # 允许发送凭据（cookies、认证头部等）
     allow_methods=["*"],  # 允许所有HTTP方法
-    # 或指定方法：allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     allow_headers=["*"],  # 允许所有HTTP头部
-    # 或指定头部：allow_headers=["Authorization", "Content-Type"]
 )
 
 #导入子路由
@@ -30,10 +51,6 @@ app.include_router(scoreController.score_router)
 app.include_router(employmentController.employment_router)
 app.include_router(classTeachingController.class_teaching_router)
 app.include_router(courseController.course_router)
-
-# 注册全局异常处理
-register_exception_handlers(app)
-
 
 @app.get("/")
 async def root():
