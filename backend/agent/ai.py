@@ -5,6 +5,7 @@ from typing import Any
 
 from agent.ai_application.ai_service import AIApplicationService
 from config.db_config import get_db
+from utils.auth import require_permission
 from utils.baseResponse import BaseResponse
 from utils.logger import AppLogger
 
@@ -53,7 +54,10 @@ def _get_ai_service() -> AIApplicationService:
 
 
 @ai_router.post("/chat", response_model=BaseResponse[AiChatResponse], description="AI 对话")
-async def ai_chat(chat_data: AiChatRequest):
+async def ai_chat(
+    chat_data: AiChatRequest,
+    _: object = Depends(require_permission("ai:chat")),
+):
     try:
         target_model = chat_data.model or "env_default"
         logger.info("AI对话请求: model=%s, message_length=%s", target_model, len(chat_data.message))
@@ -73,7 +77,11 @@ async def ai_chat(chat_data: AiChatRequest):
 
 
 @ai_router.post("/text2sql", response_model=BaseResponse[Text2SQLResponse], description="自然语言转SQL并执行只读查询")
-async def text2sql(query_data: Text2SQLRequest, db: AsyncSession = Depends(get_db)):
+async def text2sql(
+    query_data: Text2SQLRequest,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("ai:text2sql")),
+):
     try:
         target_model = query_data.model or "env_default"
         logger.info("Text2SQL请求: model=%s, max_rows=%s", target_model, query_data.max_rows)

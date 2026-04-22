@@ -11,6 +11,7 @@ from schema.employmentSchema import (
     EmploymentQueryRequest
 )
 from service import employmentService
+from utils.auth import require_permission
 from utils.baseResponse import BaseResponse
 from utils.logger import AppLogger
 
@@ -19,7 +20,12 @@ logger = AppLogger.get_logger(__name__)
 
 
 @employment_router.get("/query", response_model=BaseResponse[List[EmploymentResponse]], description="查询就业信息")
-async def get_employment(page: int = 1, page_size: int = 10, db: AsyncSession = Depends(get_db)):
+async def get_employment(
+    page: int = 1,
+    page_size: int = 10,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("employment:read")),
+):
     logger.info("就业列表查询请求: page=%s, page_size=%s", page, page_size)
     result = await employmentService.get_employment(db, page, page_size)
     logger.info("就业列表查询完成: count=%s", len(result))
@@ -27,7 +33,11 @@ async def get_employment(page: int = 1, page_size: int = 10, db: AsyncSession = 
 
 
 @employment_router.post("/query/condition", response_model=BaseResponse[List[EmploymentResponse]], description="多条件查询就业信息")
-async def get_employment_by_conditions(query_params: EmploymentQueryRequest, db: AsyncSession = Depends(get_db)):
+async def get_employment_by_conditions(
+    query_params: EmploymentQueryRequest,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("employment:read")),
+):
     logger.info("就业多条件查询请求: params=%s", query_params.model_dump())
     result = await employmentService.get_employment_by_conditions(db, query_params)
     logger.info("就业多条件查询完成: count=%s", len(result))
@@ -35,7 +45,11 @@ async def get_employment_by_conditions(query_params: EmploymentQueryRequest, db:
 
 
 @employment_router.get("/query/{employment_id}", response_model=BaseResponse[EmploymentResponse], description="查询就业详情")
-async def get_employment_detail(employment_id: int, db: AsyncSession = Depends(get_db)):
+async def get_employment_detail(
+    employment_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("employment:read")),
+):
     try:
         logger.info("就业详情查询请求: id=%s", employment_id)
         result = await employmentService.get_employment_detail(db, employment_id)
@@ -47,7 +61,11 @@ async def get_employment_detail(employment_id: int, db: AsyncSession = Depends(g
 
 
 @employment_router.post("/add", response_model=BaseResponse[EmploymentResponse], description="新增就业信息")
-async def add_employment(employment_data: EmploymentRequest, db: AsyncSession = Depends(get_db)):
+async def add_employment(
+    employment_data: EmploymentRequest,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("employment:create")),
+):
     try:
         logger.info(
             "新增就业请求: student_code=%s, company_name=%s",
@@ -68,7 +86,11 @@ async def add_employment(employment_data: EmploymentRequest, db: AsyncSession = 
 
 
 @employment_router.post("/update", response_model=BaseResponse[EmploymentResponse], description="修改就业信息")
-async def update_employment(employment_data: EmploymentUpdateRequest, db: AsyncSession = Depends(get_db)):
+async def update_employment(
+    employment_data: EmploymentUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("employment:update")),
+):
     try:
         logger.info("修改就业请求: id=%s", employment_data.id)
         result = await employmentService.update_employment(db, employment_data)
@@ -80,7 +102,11 @@ async def update_employment(employment_data: EmploymentUpdateRequest, db: AsyncS
 
 
 @employment_router.delete("/delete/{employment_id}", response_model=BaseResponse[bool], description="删除就业信息")
-async def delete_employment(employment_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_employment(
+    employment_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("employment:delete")),
+):
     try:
         logger.info("删除就业请求: id=%s", employment_id)
         await employmentService.delete_employment(db, employment_id)

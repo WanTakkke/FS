@@ -11,6 +11,7 @@ from schema.classTeachingSchema import (
     ClassTeachingQueryRequest,
 )
 from service import classTeachingService
+from utils.auth import require_permission
 from utils.baseResponse import BaseResponse
 from utils.logger import AppLogger
 
@@ -19,7 +20,12 @@ logger = AppLogger.get_logger(__name__)
 
 
 @class_teaching_router.get("/query", response_model=BaseResponse[List[ClassTeachingResponse]], description="查询班级授课信息")
-async def get_class_teaching(page: int = 1, page_size: int = 10, db: AsyncSession = Depends(get_db)):
+async def get_class_teaching(
+    page: int = 1,
+    page_size: int = 10,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("class_teaching:read")),
+):
     logger.info("班级授课列表查询请求: page=%s, page_size=%s", page, page_size)
     result = await classTeachingService.get_class_teaching(db, page, page_size)
     logger.info("班级授课列表查询完成: count=%s", len(result))
@@ -27,7 +33,11 @@ async def get_class_teaching(page: int = 1, page_size: int = 10, db: AsyncSessio
 
 
 @class_teaching_router.post("/query/condition", response_model=BaseResponse[List[ClassTeachingResponse]], description="多条件查询班级授课信息")
-async def get_class_teaching_by_conditions(query_params: ClassTeachingQueryRequest, db: AsyncSession = Depends(get_db)):
+async def get_class_teaching_by_conditions(
+    query_params: ClassTeachingQueryRequest,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("class_teaching:read")),
+):
     logger.info("班级授课多条件查询请求: params=%s", query_params.model_dump())
     result = await classTeachingService.get_class_teaching_by_conditions(db, query_params)
     logger.info("班级授课多条件查询完成: count=%s", len(result))
@@ -35,7 +45,11 @@ async def get_class_teaching_by_conditions(query_params: ClassTeachingQueryReque
 
 
 @class_teaching_router.get("/query/{teaching_id}", response_model=BaseResponse[ClassTeachingResponse], description="查询班级授课详情（按授课老师id）")
-async def get_class_teaching_detail(teaching_id: int, db: AsyncSession = Depends(get_db)):
+async def get_class_teaching_detail(
+    teaching_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("class_teaching:read")),
+):
     try:
         logger.info("班级授课详情查询请求: id=%s", teaching_id)
         result = await classTeachingService.get_class_teaching_detail(db, teaching_id)
@@ -47,7 +61,11 @@ async def get_class_teaching_detail(teaching_id: int, db: AsyncSession = Depends
 
 
 @class_teaching_router.post("/add", response_model=BaseResponse[ClassTeachingResponse], description="新增班级授课信息")
-async def add_class_teaching(teaching_data: ClassTeachingRequest, db: AsyncSession = Depends(get_db)):
+async def add_class_teaching(
+    teaching_data: ClassTeachingRequest,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("class_teaching:create")),
+):
     try:
         logger.info(
             "新增班级授课请求: class_code=%s, lecturer_code=%s, course_code=%s",
@@ -75,7 +93,11 @@ async def add_class_teaching(teaching_data: ClassTeachingRequest, db: AsyncSessi
 
 
 @class_teaching_router.post("/update", response_model=BaseResponse[ClassTeachingResponse], description="修改班级授课信息")
-async def update_class_teaching(teaching_data: ClassTeachingUpdateRequest, db: AsyncSession = Depends(get_db)):
+async def update_class_teaching(
+    teaching_data: ClassTeachingUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("class_teaching:update")),
+):
     try:
         logger.info("修改班级授课请求: id=%s", teaching_data.id)
         result = await classTeachingService.update_class_teaching(db, teaching_data)
@@ -87,7 +109,11 @@ async def update_class_teaching(teaching_data: ClassTeachingUpdateRequest, db: A
 
 
 @class_teaching_router.delete("/delete/{teaching_id}", response_model=BaseResponse[bool], description="删除班级授课信息")
-async def delete_class_teaching(teaching_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_class_teaching(
+    teaching_id: int,
+    db: AsyncSession = Depends(get_db),
+    _: object = Depends(require_permission("class_teaching:delete")),
+):
     try:
         logger.info("删除班级授课请求: id=%s", teaching_id)
         await classTeachingService.delete_class_teaching(db, teaching_id)

@@ -19,3 +19,13 @@ async def create_user(db: AsyncSession, user: SysUser):
     await db.commit()
     await db.refresh(user)
     return user
+
+
+async def get_user_by_id(db: AsyncSession, user_id: int):
+    result = await db.execute(
+        select(SysUser).where(
+            SysUser.id == user_id,
+            SysUser.deleted_at.is_(None),
+        )
+    )
+    return result.scalar_one_or_none()

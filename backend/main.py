@@ -8,6 +8,7 @@ from agent import ai
 from controller import (
     studentController,
     userController,
+    rbacController,
     classController,
     scoreController,
     employmentController,
@@ -55,6 +56,7 @@ app.add_middleware(
 #导入子路由
 app.include_router(studentController.stu_router)
 app.include_router(userController.user_router)
+app.include_router(rbacController.rbac_router)
 app.include_router(classController.class_router)
 app.include_router(scoreController.score_router)
 app.include_router(employmentController.employment_router)

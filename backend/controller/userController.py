@@ -3,8 +3,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.baseResponse import BaseResponse
 from config.db_config import get_db
-from schema.userSchema import UserRegisterRequest, UserLoginRequest, UserResponse, TokenResponse
+from schema.userSchema import (
+    UserRegisterRequest,
+    UserLoginRequest,
+    UserResponse,
+    TokenResponse,
+    RefreshTokenRequest,
+    CurrentUserResponse,
+)
 from service import userService
+from utils.auth import get_current_user
 
 user_router = APIRouter(prefix="/api/user", tags=["用户模块"])
 
@@ -24,3 +32,17 @@ async def login(login_data: UserLoginRequest, db: AsyncSession = Depends(get_db)
     if not result:
         raise HTTPException(status_code=401, detail="用户名或密码错误")
     return BaseResponse.success(data=result)
+
+
+@user_router.post("/refresh", response_model=BaseResponse[TokenResponse], description="刷新访问令牌")
+async def refresh_token(data: RefreshTokenRequest, db: AsyncSession = Depends(get_db)):
+    try:
+        result = await userService.refresh_access_token(db, data.refresh_token)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@user_router.get("/me", response_model=BaseResponse[CurrentUserResponse], description="获取当前用户信息")
+async def get_me(current_user: CurrentUserResponse = Depends(get_current_user)):
+    return BaseResponse.success(data=current_user)
