@@ -189,6 +189,38 @@ async def list_user_ids_by_role(db: AsyncSession, role_id: int) -> list[int]:
     return [int(row[0]) for row in result.all()]
 
 
+async def count_active_users_by_role(db: AsyncSession, role_id: int) -> int:
+    result = await db.execute(
+        text(
+            """
+            SELECT COUNT(DISTINCT ur.user_id)
+            FROM sys_user_role ur
+            JOIN sys_user u ON u.id = ur.user_id
+            WHERE ur.role_id = :role_id
+              AND u.deleted_at IS NULL
+              AND u.is_active = 1
+            """
+        ),
+        {"role_id": role_id},
+    )
+    return int(result.scalar_one() or 0)
+
+
+async def user_has_role(db: AsyncSession, user_id: int, role_id: int) -> bool:
+    result = await db.execute(
+        text(
+            """
+            SELECT 1
+            FROM sys_user_role
+            WHERE user_id = :user_id AND role_id = :role_id
+            LIMIT 1
+            """
+        ),
+        {"user_id": user_id, "role_id": role_id},
+    )
+    return result.scalar_one_or_none() is not None
+
+
 async def create_audit_log(
     db: AsyncSession,
     module: str,
