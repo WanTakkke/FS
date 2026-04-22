@@ -111,7 +111,11 @@ async def bind_role_permissions(
         return BaseResponse.error(code=400, message=str(e))
 
 
-@rbac_router.get("/users/{user_id}/permissions", response_model=BaseResponse[UserRolePermissionResponse], dependencies=[Depends(get_current_user)])
+@rbac_router.get(
+    "/users/{user_id}/permissions",
+    response_model=BaseResponse[UserRolePermissionResponse],
+    dependencies=[Depends(require_permission("rbac:role:read"))],
+)
 async def get_user_role_permission(user_id: int, db: AsyncSession = Depends(get_db)):
     """查询用户角色与权限"""
     try:
