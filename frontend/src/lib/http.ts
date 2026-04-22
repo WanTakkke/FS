@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosRequestConfig } from "axios";
-import { message } from "antd";
 
+import { showErrorMessage } from "./appMessage";
 import { useUiStore } from "../store/uiStore";
 import { useAuthStore } from "../store/authStore";
 import type { ApiResponse } from "../types/common";
@@ -90,7 +90,7 @@ http.interceptors.response.use(
       error?.response?.data?.message ??
       error?.message ??
       "请求失败，请稍后重试";
-    message.error(errorMessage);
+    showErrorMessage(errorMessage);
     return Promise.reject(error);
   },
 );
@@ -100,7 +100,7 @@ export async function unwrapResponse<T>(promise: Promise<{ data: ApiResponse<T> 
   const payload = response.data;
   if (payload.code !== 200) {
     const businessError = payload.message || "业务请求失败";
-    message.error(businessError);
+    showErrorMessage(businessError);
     throw new Error(businessError);
   }
   return payload.data;

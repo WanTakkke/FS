@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
-async function mockLoginAndProfile(page: Parameters<typeof test>[0]["page"]) {
+async function mockLoginAndProfile(page: Page) {
   await page.route("**/api/user/login", async (route) => {
     await route.fulfill({
       status: 200,
@@ -39,7 +40,7 @@ async function mockLoginAndProfile(page: Parameters<typeof test>[0]["page"]) {
   });
 }
 
-async function doLogin(page: Parameters<typeof test>[0]["page"]) {
+async function doLogin(page: Page) {
   await page.goto("/login");
   await page.getByLabel("用户名").fill("admin");
   await page.getByLabel("密码").fill("123456");

@@ -31,7 +31,10 @@ export function AiPage() {
     },
   });
 
-  const rows = text2SqlMutation.data?.rows ?? [];
+  const rows = (text2SqlMutation.data?.rows ?? []).map((item, index) => ({
+    ...item,
+    __rowKey: `${index}-${JSON.stringify(item)}`,
+  }));
   const columns = (text2SqlMutation.data?.columns ?? []).map((key) => ({
     title: key,
     dataIndex: key,
@@ -107,7 +110,7 @@ export function AiPage() {
 
               <Card style={{ marginTop: 16 }} type="inner" title="查询结果">
                 <Table
-                  rowKey={(_, index) => String(index)}
+                  rowKey="__rowKey"
                   columns={columns}
                   dataSource={rows}
                   pagination={{ pageSize: 10 }}

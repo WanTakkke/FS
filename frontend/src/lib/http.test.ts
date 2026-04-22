@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("antd", () => ({
-  message: {
-    error: vi.fn(),
-  },
+vi.mock("./appMessage", () => ({
+  showErrorMessage: vi.fn(),
 }));
 
 import { unwrapResponse } from "./http";
