@@ -251,3 +251,51 @@ async def create_audit_log(
         },
     )
     await db.commit()
+
+
+async def query_audit_logs(
+    db: AsyncSession,
+    page: int,
+    page_size: int,
+    module: str | None = None,
+    action: str | None = None,
+    operator_username: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+):
+    where_sql = ["1=1"]
+    params: dict[str, object] = {
+        "offset": (page - 1) * page_size,
+        "page_size": page_size,
+    }
+    if module:
+        where_sql.append("module = :module")
+        params["module"] = module
+    if action:
+        where_sql.append("action = :action")
+        params["action"] = action
+    if operator_username:
+        where_sql.append("operator_username LIKE :operator_username")
+        params["operator_username"] = f"%{operator_username}%"
+    if start_time:
+        where_sql.append("created_at >= :start_time")
+        params["start_time"] = start_time
+    if end_time:
+        where_sql.append("created_at <= :end_time")
+        params["end_time"] = end_time
+
+    where_clause = " AND ".join(where_sql)
+    count_sql = f"SELECT COUNT(1) FROM sys_audit_log WHERE {where_clause}"
+    list_sql = f"""
+        SELECT id, module, action, operator_id, operator_username, target_type, target_id, detail_json, created_at
+        FROM sys_audit_log
+        WHERE {where_clause}
+        ORDER BY id DESC
+        LIMIT :offset, :page_size
+    """
+
+    total_result = await db.execute(text(count_sql), params)
+    total = int(total_result.scalar_one() or 0)
+    records_result = await db.execute(text(list_sql), params)
+    records = records_result.mappings().all()
+    return total, records

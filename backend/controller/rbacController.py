@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.db_config import get_db
 from schema.rbacSchema import (
+    AuditLogPageResponse,
     PermissionResponse,
     RoleCreateRequest,
     RolePermissionBindRequest,
@@ -123,4 +124,37 @@ async def get_user_role_permission(user_id: int, db: AsyncSession = Depends(get_
         return BaseResponse.success(data=result)
     except ValueError as e:
         logger.warning("查询用户权限失败: user_id=%s reason=%s", user_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@rbac_router.get(
+    "/audit/logs",
+    response_model=BaseResponse[AuditLogPageResponse],
+    dependencies=[Depends(require_permission("rbac:audit:read"))],
+)
+async def list_audit_logs(
+    page: int = 1,
+    page_size: int = 20,
+    module: str | None = None,
+    action: str | None = None,
+    operator_username: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """审计日志分页查询"""
+    try:
+        result = await rbacService.list_audit_logs(
+            db=db,
+            page=page,
+            page_size=page_size,
+            module=module,
+            action=action,
+            operator_username=operator_username,
+            start_time=start_time,
+            end_time=end_time,
+        )
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("审计日志查询失败: reason=%s", str(e))
         return BaseResponse.error(code=400, message=str(e))

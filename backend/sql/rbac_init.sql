@@ -2,8 +2,42 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 用户权限版本号（角色/权限变更后递增，用于access token快速失效）
-ALTER TABLE `sys_user`
-ADD COLUMN IF NOT EXISTS `perm_version` BIGINT NOT NULL DEFAULT 1 COMMENT '权限版本号';
+SET @col_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'sys_user'
+    AND COLUMN_NAME = 'perm_version'
+);
+
+SET @ddl := IF(
+  @col_exists = 0,
+  'ALTER TABLE sys_user ADD COLUMN perm_version BIGINT NOT NULL DEFAULT 1 COMMENT ''权限版本号''',
+  'SELECT 1'
+);
+
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @perm_nullable := (
+  SELECT CASE WHEN IS_NULLABLE = 'YES' THEN 1 ELSE 0 END
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'sys_user'
+    AND COLUMN_NAME = 'perm_version'
+  LIMIT 1
+);
+
+SET @fix_null_sql := IF(
+  COALESCE(@perm_nullable, 0) = 1,
+  'UPDATE sys_user SET perm_version = 1 WHERE perm_version IS NULL',
+  'SELECT 1'
+);
+
+PREPARE stmt_fix FROM @fix_null_sql;
+EXECUTE stmt_fix;
+DEALLOCATE PREPARE stmt_fix;
 
 -- 刷新令牌表（refresh token 轮换与失效）
 CREATE TABLE IF NOT EXISTS `sys_refresh_token` (
@@ -58,6 +92,7 @@ FROM (
     UNION ALL SELECT '角色更新', 'rbac:role:update'
     UNION ALL SELECT '角色删除', 'rbac:role:delete'
     UNION ALL SELECT '权限查询', 'rbac:permission:read'
+    UNION ALL SELECT '审计日志查询', 'rbac:audit:read'
     UNION ALL SELECT '用户绑定角色', 'rbac:user:bind_role'
     UNION ALL SELECT '角色绑定权限', 'rbac:role:bind_permission'
     UNION ALL SELECT '学生查询', 'student:read'

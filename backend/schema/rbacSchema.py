@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -47,3 +49,22 @@ class UserRolePermissionResponse(BaseModel):
     username: str
     roles: list[str]
     permissions: list[str]
+
+
+class AuditLogItemResponse(BaseModel):
+    id: int
+    module: str
+    action: str
+    operator_id: int | None = None
+    operator_username: str
+    target_type: str
+    target_id: str
+    detail_json: str | None = None
+    created_at: datetime
+
+
+class AuditLogPageResponse(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    records: list[AuditLogItemResponse]

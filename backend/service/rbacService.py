@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mapper import rbacMapper, userMapper
 from schema.userSchema import CurrentUserResponse
 from schema.rbacSchema import (
+    AuditLogItemResponse,
+    AuditLogPageResponse,
     PermissionResponse,
     RoleCreateRequest,
     RoleResponse,
@@ -183,4 +185,36 @@ async def get_user_role_permission(db: AsyncSession, user_id: int):
         username=user.username,
         roles=roles,
         permissions=permissions,
+    )
+
+
+async def list_audit_logs(
+    db: AsyncSession,
+    page: int = 1,
+    page_size: int = 20,
+    module: str | None = None,
+    action: str | None = None,
+    operator_username: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+):
+    if page < 1:
+        raise ValueError("page 必须大于等于 1")
+    if page_size < 1 or page_size > 200:
+        raise ValueError("page_size 必须在 1~200 之间")
+    total, records = await rbacMapper.query_audit_logs(
+        db=db,
+        page=page,
+        page_size=page_size,
+        module=module,
+        action=action,
+        operator_username=operator_username,
+        start_time=start_time,
+        end_time=end_time,
+    )
+    return AuditLogPageResponse(
+        total=total,
+        page=page,
+        page_size=page_size,
+        records=[AuditLogItemResponse.model_validate(item) for item in records],
     )
