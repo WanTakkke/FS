@@ -11,7 +11,9 @@ from service import userService
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
-
+"""
+获取当前用户
+"""
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),
@@ -42,6 +44,9 @@ async def get_current_user(
     )
 
 
+"""
+权限检查
+"""
 def require_permission(permission_code: str) -> Callable:
     async def _check(current_user: CurrentUserResponse = Depends(get_current_user)) -> CurrentUserResponse:
         if "admin" in current_user.roles:

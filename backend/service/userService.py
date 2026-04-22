@@ -19,7 +19,6 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
-#TODO：目前只完成了token的生成，但是token验证功能还未完成
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     # 限制密码长度
@@ -36,10 +35,12 @@ def get_password_hash(password: str) -> str:
     salt = bcrypt.gensalt()
     # 生成哈希
     hashed = bcrypt.hashpw(password_bytes, salt)
-    # 返回哈希
+    # 返回哈希（字符串）
     return hashed.decode('utf-8')
 
-
+"""
+解码token
+"""
 def decode_token(token: str) -> dict:
     try:
         return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
