@@ -1,4 +1,5 @@
 import { http, unwrapResponse } from "../lib/http";
+import { assertNonEmptyString, assertNumberInRange } from "../lib/validators";
 
 export interface AiChatPayload {
   message: string;
@@ -27,9 +28,20 @@ export interface Text2SqlResult {
 }
 
 export async function chatWithAi(payload: AiChatPayload) {
+  assertNonEmptyString(payload.message, "对话内容");
+  if (payload.temperature !== undefined) {
+    assertNumberInRange(payload.temperature, "temperature", 0, 2);
+  }
   return unwrapResponse<AiChatResult>(http.post("/api/ai/chat", payload));
 }
 
 export async function text2sql(payload: Text2SqlPayload) {
+  assertNonEmptyString(payload.question, "查询问题");
+  if (payload.temperature !== undefined) {
+    assertNumberInRange(payload.temperature, "temperature", 0, 1);
+  }
+  if (payload.max_rows !== undefined) {
+    assertNumberInRange(payload.max_rows, "max_rows", 1, 200);
+  }
   return unwrapResponse<Text2SqlResult>(http.post("/api/ai/text2sql", payload));
 }

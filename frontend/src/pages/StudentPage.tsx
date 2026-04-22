@@ -103,7 +103,7 @@ export function StudentPage() {
         ),
       },
     ],
-    [deleteMutation.isPending, form],
+    [deleteMutation, form],
   );
 
   return (
