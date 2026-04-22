@@ -1,17 +1,15 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 8.138.165.139
  Source Server Type    : MySQL
  Source Server Version : 80402 (8.4.2)
- Source Host           : 8.138.165.139:13306
  Source Schema         : fastapi_02
 
  Target Server Type    : MySQL
  Target Server Version : 80402 (8.4.2)
  File Encoding         : 65001
 
- Date: 22/04/2026 09:51:47
+ Date: 22/04/2026 16:34:32
 */
 
 SET NAMES utf8mb4;
@@ -186,6 +184,30 @@ INSERT INTO `students` VALUES (6, 'S2026002', 1, 3, '王五', 0, 22, '上海', '
 INSERT INTO `students` VALUES (7, 'S2026003', 2, 1, '赵六', 1, 24, '广州', '中山大学', '信息管理', '2026-04-02', NULL, '本科', 0, '2026-04-20 19:43:51', '2026-04-20 19:49:46');
 
 -- ----------------------------
+-- Table structure for sys_audit_log
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_audit_log`;
+CREATE TABLE `sys_audit_log`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `module` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '模块名称，如rbac',
+  `action` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '动作编码，如role.create',
+  `operator_id` bigint NULL DEFAULT NULL COMMENT '操作者用户ID',
+  `operator_username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '操作者用户名',
+  `target_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '目标类型，如role/user',
+  `target_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '目标标识',
+  `detail_json` json NULL COMMENT '变更详情JSON',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_sal_module_action`(`module` ASC, `action` ASC) USING BTREE,
+  INDEX `idx_sal_operator_id`(`operator_id` ASC) USING BTREE,
+  INDEX `idx_sal_created_at`(`created_at` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统审计日志表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_audit_log
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for sys_permission
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_permission`;
@@ -201,10 +223,64 @@ CREATE TABLE `sys_permission`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code_deleted`(`code` ASC, `deleted_at` ASC) USING BTREE COMMENT '权限编码唯一索引',
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE COMMENT '父节点查询索引'
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 47 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统权限表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_permission
+-- ----------------------------
+INSERT INTO `sys_permission` VALUES (1, NULL, '角色查询', 'rbac:role:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (2, NULL, '角色创建', 'rbac:role:create', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (3, NULL, '角色更新', 'rbac:role:update', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (4, NULL, '角色删除', 'rbac:role:delete', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (5, NULL, '权限查询', 'rbac:permission:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (6, NULL, '用户绑定角色', 'rbac:user:bind_role', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (7, NULL, '角色绑定权限', 'rbac:role:bind_permission', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (8, NULL, '学生查询', 'student:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (9, NULL, '学生新增', 'student:create', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (10, NULL, '学生更新', 'student:update', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (11, NULL, '学生删除', 'student:delete', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (12, NULL, '成绩查询', 'score:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (13, NULL, '成绩新增', 'score:create', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (14, NULL, '成绩更新', 'score:update', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (15, NULL, '成绩删除', 'score:delete', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_permission` VALUES (16, NULL, '班级查询', 'class:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (17, NULL, '班级新增', 'class:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (18, NULL, '班级更新', 'class:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (19, NULL, '班级删除', 'class:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (20, NULL, '课程查询', 'course:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (21, NULL, '课程新增', 'course:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (22, NULL, '课程更新', 'course:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (23, NULL, '课程删除', 'course:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (24, NULL, '就业查询', 'employment:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (25, NULL, '就业新增', 'employment:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (26, NULL, '就业更新', 'employment:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (27, NULL, '就业删除', 'employment:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (28, NULL, '班级授课查询', 'class_teaching:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (29, NULL, '班级授课新增', 'class_teaching:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (30, NULL, '班级授课更新', 'class_teaching:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (31, NULL, '班级授课删除', 'class_teaching:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (32, NULL, 'AI对话', 'ai:chat', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (33, NULL, 'AI Text2SQL', 'ai:text2sql', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+
+-- ----------------------------
+-- Table structure for sys_refresh_token
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_refresh_token`;
+CREATE TABLE `sys_refresh_token`  (
+  `token_jti` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'refresh token唯一ID(JTI)',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `expires_at` datetime NOT NULL COMMENT 'refresh token过期时间',
+  `revoked_at` datetime NULL DEFAULT NULL COMMENT '失效时间，NULL表示有效',
+  `replaced_by_jti` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '被轮换的新token_jti',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`token_jti`) USING BTREE,
+  INDEX `idx_srt_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_srt_expires_at`(`expires_at` ASC) USING BTREE,
+  INDEX `idx_srt_revoked_at`(`revoked_at` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '刷新令牌表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_refresh_token
 -- ----------------------------
 
 -- ----------------------------
@@ -222,11 +298,13 @@ CREATE TABLE `sys_role`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code_deleted`(`code` ASC, `deleted_at` ASC) USING BTREE COMMENT '角色编码唯一索引',
   INDEX `idx_name`(`name` ASC) USING BTREE COMMENT '角色名称查询索引'
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统角色表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统角色表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
+INSERT INTO `sys_role` VALUES (1, '超级管理员', 'admin', '系统超级管理员', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
+INSERT INTO `sys_role` VALUES (2, '教务老师', 'teacher', '教学业务操作角色', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
 
 -- ----------------------------
 -- Table structure for sys_role_permission
@@ -243,6 +321,65 @@ CREATE TABLE `sys_role_permission`  (
 -- ----------------------------
 -- Records of sys_role_permission
 -- ----------------------------
+INSERT INTO `sys_role_permission` VALUES (1, 1, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 2, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 3, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 4, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 5, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 6, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 7, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 8, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 9, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 10, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 11, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 12, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 13, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 14, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 15, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (1, 16, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 17, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 18, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 19, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 20, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 21, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 22, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 23, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 24, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 25, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 26, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 27, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 28, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 29, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 30, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 31, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 32, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 33, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 8, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 9, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 10, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 11, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 12, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 13, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 14, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 15, '2026-04-22 11:24:56');
+INSERT INTO `sys_role_permission` VALUES (2, 16, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 17, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 18, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 19, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 20, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 21, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 22, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 23, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 24, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 25, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 26, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 27, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 28, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 29, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 30, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 31, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 32, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (2, 33, '2026-04-22 11:38:03');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -285,6 +422,7 @@ CREATE TABLE `sys_user_role`  (
 -- ----------------------------
 -- Records of sys_user_role
 -- ----------------------------
+INSERT INTO `sys_user_role` VALUES (2, 1, '2026-04-22 11:24:56');
 
 -- ----------------------------
 -- Table structure for teachers
