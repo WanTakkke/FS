@@ -42,7 +42,9 @@ export async function unwrapResponse<T>(promise: Promise<{ data: ApiResponse<T> 
   const response = await promise;
   const payload = response.data;
   if (payload.code !== 200) {
-    throw new Error(payload.message || "业务请求失败");
+    const businessError = payload.message || "业务请求失败";
+    message.error(businessError);
+    throw new Error(businessError);
   }
   return payload.data;
 }
