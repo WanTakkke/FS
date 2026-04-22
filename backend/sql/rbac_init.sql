@@ -1,6 +1,37 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- 刷新令牌表（refresh token 轮换与失效）
+CREATE TABLE IF NOT EXISTS `sys_refresh_token` (
+  `token_jti` VARCHAR(64) NOT NULL COMMENT 'refresh token唯一ID(JTI)',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `expires_at` DATETIME NOT NULL COMMENT 'refresh token过期时间',
+  `revoked_at` DATETIME DEFAULT NULL COMMENT '失效时间，NULL表示有效',
+  `replaced_by_jti` VARCHAR(64) DEFAULT NULL COMMENT '被轮换的新token_jti',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`token_jti`),
+  KEY `idx_srt_user_id` (`user_id`),
+  KEY `idx_srt_expires_at` (`expires_at`),
+  KEY `idx_srt_revoked_at` (`revoked_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='刷新令牌表';
+
+-- 审计日志表（RBAC关键操作记录）
+CREATE TABLE IF NOT EXISTS `sys_audit_log` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `module` VARCHAR(64) NOT NULL COMMENT '模块名称，如rbac',
+  `action` VARCHAR(64) NOT NULL COMMENT '动作编码，如role.create',
+  `operator_id` BIGINT DEFAULT NULL COMMENT '操作者用户ID',
+  `operator_username` VARCHAR(64) NOT NULL COMMENT '操作者用户名',
+  `target_type` VARCHAR(64) NOT NULL COMMENT '目标类型，如role/user',
+  `target_id` VARCHAR(64) NOT NULL COMMENT '目标标识',
+  `detail_json` JSON DEFAULT NULL COMMENT '变更详情JSON',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_sal_module_action` (`module`, `action`),
+  KEY `idx_sal_operator_id` (`operator_id`),
+  KEY `idx_sal_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统审计日志表';
+
 -- 初始化角色
 INSERT INTO sys_role(name, code, description, created_at, updated_at, deleted_at)
 SELECT '超级管理员', 'admin', '系统超级管理员', NOW(), NOW(), NULL

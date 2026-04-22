@@ -1,6 +1,7 @@
 import bcrypt
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from uuid import uuid4
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,14 +61,26 @@ def _create_access_token(user_id: int, username: str, roles: list[str]) -> str:
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def _create_refresh_token(user_id: int) -> str:
+def _create_refresh_token(user_id: int, token_jti: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     payload = {
         "sub": str(user_id),
+        "jti": token_jti,
         "token_type": "refresh",
         "exp": expire,
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def _extract_expire_at(payload: dict) -> datetime:
+    raw_exp = payload.get("exp")
+    if raw_exp is None:
+        raise ValueError("token缺少过期时间")
+    if isinstance(raw_exp, (int, float)):
+        return datetime.fromtimestamp(raw_exp, tz=timezone.utc)
+    if isinstance(raw_exp, datetime):
+        return raw_exp.astimezone(timezone.utc)
+    raise ValueError("token过期时间格式不合法")
 
 
 async def login_user(db: AsyncSession, login_data: UserLoginRequest) -> Optional[TokenResponse]:
@@ -80,7 +93,15 @@ async def login_user(db: AsyncSession, login_data: UserLoginRequest) -> Optional
         return None
     roles = await rbacMapper.get_user_roles(db, user.id)
     access_token = _create_access_token(user.id, user.username, roles)
-    refresh_token = _create_refresh_token(user.id)
+    refresh_jti = str(uuid4())
+    refresh_token = _create_refresh_token(user.id, refresh_jti)
+    refresh_payload = decode_token(refresh_token)
+    await userMapper.create_refresh_token_record(
+        db,
+        token_jti=refresh_jti,
+        user_id=user.id,
+        expires_at=_extract_expire_at(refresh_payload),
+    )
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -110,16 +131,36 @@ async def refresh_access_token(db: AsyncSession, refresh_token: str) -> TokenRes
     if payload.get("token_type") != "refresh":
         raise ValueError("refresh_token类型错误")
     user_id = int(payload.get("sub", "0"))
+    token_jti = str(payload.get("jti", "")).strip()
+    if not token_jti:
+        raise ValueError("refresh_token缺少jti")
     if user_id <= 0:
         raise ValueError("refresh_token缺少用户信息")
+    refresh_record = await userMapper.get_refresh_token_record(db, token_jti)
+    if not refresh_record:
+        raise ValueError("refresh_token不存在或已失效")
+    if int(refresh_record["user_id"]) != user_id:
+        raise ValueError("refresh_token用户不匹配")
+    if not userMapper.is_refresh_record_active(refresh_record):
+        raise ValueError("refresh_token不存在或已失效")
     user = await userMapper.get_user_by_id(db, user_id)
     if not user or user.is_active != 1:
         raise ValueError("用户不存在或已禁用")
     roles = await rbacMapper.get_user_roles(db, user.id)
     access_token = _create_access_token(user.id, user.username, roles)
+    new_refresh_jti = str(uuid4())
+    new_refresh_token = _create_refresh_token(user.id, new_refresh_jti)
+    new_refresh_payload = decode_token(new_refresh_token)
+    await userMapper.revoke_refresh_token(db, token_jti=token_jti, replaced_by_jti=new_refresh_jti)
+    await userMapper.create_refresh_token_record(
+        db,
+        token_jti=new_refresh_jti,
+        user_id=user.id,
+        expires_at=_extract_expire_at(new_refresh_payload),
+    )
     return TokenResponse(
         access_token=access_token,
-        refresh_token=refresh_token,
+        refresh_token=new_refresh_token,
         token_type="bearer",
         expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )

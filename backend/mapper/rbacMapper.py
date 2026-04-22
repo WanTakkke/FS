@@ -172,3 +172,35 @@ async def replace_role_permissions(db: AsyncSession, role_id: int, permission_id
             {"role_id": role_id, "permission_id": permission_id},
         )
     await db.commit()
+
+
+async def create_audit_log(
+    db: AsyncSession,
+    module: str,
+    action: str,
+    operator_id: int | None,
+    operator_username: str,
+    target_type: str,
+    target_id: str,
+    detail_json: str | None = None,
+) -> None:
+    await db.execute(
+        text(
+            """
+            INSERT INTO sys_audit_log(
+                module, action, operator_id, operator_username, target_type, target_id, detail_json, created_at
+            )
+            VALUES(:module, :action, :operator_id, :operator_username, :target_type, :target_id, :detail_json, NOW())
+            """
+        ),
+        {
+            "module": module,
+            "action": action,
+            "operator_id": operator_id,
+            "operator_username": operator_username,
+            "target_type": target_type,
+            "target_id": target_id,
+            "detail_json": detail_json,
+        },
+    )
+    await db.commit()
