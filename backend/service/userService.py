@@ -49,12 +49,13 @@ def decode_token(token: str) -> dict:
         raise ValueError("token无效或已过期") from e
 
 
-def _create_access_token(user_id: int, username: str, roles: list[str]) -> str:
+def _create_access_token(user_id: int, username: str, roles: list[str], perm_version: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user_id),
         "username": username,
         "roles": roles,
+        "perm_version": perm_version,
         "token_type": "access",
         "exp": expire,
     }
@@ -92,7 +93,8 @@ async def login_user(db: AsyncSession, login_data: UserLoginRequest) -> Optional
     if user.is_active != 1:
         return None
     roles = await rbacMapper.get_user_roles(db, user.id)
-    access_token = _create_access_token(user.id, user.username, roles)
+    perm_version = await userMapper.get_user_perm_version(db, user.id)
+    access_token = _create_access_token(user.id, user.username, roles, perm_version)
     refresh_jti = str(uuid4())
     refresh_token = _create_refresh_token(user.id, refresh_jti)
     refresh_payload = decode_token(refresh_token)
@@ -147,7 +149,8 @@ async def refresh_access_token(db: AsyncSession, refresh_token: str) -> TokenRes
     if not user or user.is_active != 1:
         raise ValueError("用户不存在或已禁用")
     roles = await rbacMapper.get_user_roles(db, user.id)
-    access_token = _create_access_token(user.id, user.username, roles)
+    perm_version = await userMapper.get_user_perm_version(db, user.id)
+    access_token = _create_access_token(user.id, user.username, roles, perm_version)
     new_refresh_jti = str(uuid4())
     new_refresh_token = _create_refresh_token(user.id, new_refresh_jti)
     new_refresh_payload = decode_token(new_refresh_token)

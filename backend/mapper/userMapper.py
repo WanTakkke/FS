@@ -33,6 +33,55 @@ async def get_user_by_id(db: AsyncSession, user_id: int):
     return result.scalar_one_or_none()
 
 
+async def get_user_perm_version(db: AsyncSession, user_id: int) -> int:
+    result = await db.execute(
+        text(
+            """
+            SELECT COALESCE(perm_version, 1) AS perm_version
+            FROM sys_user
+            WHERE id = :user_id AND deleted_at IS NULL
+            LIMIT 1
+            """
+        ),
+        {"user_id": user_id},
+    )
+    row = result.mappings().first()
+    if not row:
+        raise ValueError("用户不存在")
+    return int(row["perm_version"])
+
+
+async def bump_user_perm_version(db: AsyncSession, user_id: int) -> None:
+    await db.execute(
+        text(
+            """
+            UPDATE sys_user
+            SET perm_version = COALESCE(perm_version, 1) + 1,
+                updated_at = NOW()
+            WHERE id = :user_id AND deleted_at IS NULL
+            """
+        ),
+        {"user_id": user_id},
+    )
+    await db.commit()
+
+
+async def bump_users_perm_version_by_role(db: AsyncSession, role_id: int) -> None:
+    await db.execute(
+        text(
+            """
+            UPDATE sys_user u
+            JOIN sys_user_role ur ON ur.user_id = u.id
+            SET u.perm_version = COALESCE(u.perm_version, 1) + 1,
+                u.updated_at = NOW()
+            WHERE ur.role_id = :role_id AND u.deleted_at IS NULL
+            """
+        ),
+        {"role_id": role_id},
+    )
+    await db.commit()
+
+
 async def create_refresh_token_record(
     db: AsyncSession,
     token_jti: str,

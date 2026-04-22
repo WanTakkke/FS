@@ -30,9 +30,16 @@ async def get_current_user(
     sub = payload.get("sub")
     if not sub:
         raise HTTPException(status_code=401, detail="token缺少用户标识")
-    user = await userMapper.get_user_by_id(db, int(sub))
+    user_id = int(sub)
+    user = await userMapper.get_user_by_id(db, user_id)
     if not user or user.is_active != 1:
         raise HTTPException(status_code=401, detail="用户不存在或已禁用")
+    token_perm_version = payload.get("perm_version")
+    if token_perm_version is None:
+        raise HTTPException(status_code=401, detail="token权限版本无效，请重新登录")
+    current_perm_version = await userMapper.get_user_perm_version(db, user_id)
+    if int(token_perm_version) != current_perm_version:
+        raise HTTPException(status_code=401, detail="登录状态已变更，请重新登录")
     roles = await rbacMapper.get_user_roles(db, user.id)
     permissions = await rbacMapper.get_user_permissions(db, user.id)
     return CurrentUserResponse(

@@ -174,6 +174,21 @@ async def replace_role_permissions(db: AsyncSession, role_id: int, permission_id
     await db.commit()
 
 
+async def list_user_ids_by_role(db: AsyncSession, role_id: int) -> list[int]:
+    result = await db.execute(
+        text(
+            """
+            SELECT DISTINCT ur.user_id
+            FROM sys_user_role ur
+            JOIN sys_user u ON u.id = ur.user_id
+            WHERE ur.role_id = :role_id AND u.deleted_at IS NULL
+            """
+        ),
+        {"role_id": role_id},
+    )
+    return [int(row[0]) for row in result.all()]
+
+
 async def create_audit_log(
     db: AsyncSession,
     module: str,

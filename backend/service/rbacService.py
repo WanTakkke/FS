@@ -84,7 +84,10 @@ async def delete_role(db: AsyncSession, role_id: int, operator: CurrentUserRespo
     exists = await rbacMapper.get_role_by_id(db, role_id)
     if not exists:
         raise ValueError(f"角色ID {role_id} 不存在")
+    affected_user_ids = await rbacMapper.list_user_ids_by_role(db, role_id)
     result = await rbacMapper.soft_delete_role(db, role_id)
+    for user_id in affected_user_ids:
+        await userMapper.bump_user_perm_version(db, user_id)
     operator_id, operator_name = _operator_fields(operator)
     await rbacMapper.create_audit_log(
         db,
@@ -114,6 +117,7 @@ async def bind_user_roles(
     if not user:
         raise ValueError(f"用户ID {user_id} 不存在")
     await rbacMapper.replace_user_roles(db, user_id=user_id, role_ids=role_ids)
+    await userMapper.bump_user_perm_version(db, user_id)
     operator_id, operator_name = _operator_fields(operator)
     await rbacMapper.create_audit_log(
         db,
@@ -138,6 +142,7 @@ async def bind_role_permissions(
     if not role:
         raise ValueError(f"角色ID {role_id} 不存在")
     await rbacMapper.replace_role_permissions(db, role_id=role_id, permission_ids=permission_ids)
+    await userMapper.bump_users_perm_version_by_role(db, role_id)
     operator_id, operator_name = _operator_fields(operator)
     await rbacMapper.create_audit_log(
         db,

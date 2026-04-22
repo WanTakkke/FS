@@ -1,6 +1,10 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- 用户权限版本号（角色/权限变更后递增，用于access token快速失效）
+ALTER TABLE `sys_user`
+ADD COLUMN IF NOT EXISTS `perm_version` BIGINT NOT NULL DEFAULT 1 COMMENT '权限版本号';
+
 -- 刷新令牌表（refresh token 轮换与失效）
 CREATE TABLE IF NOT EXISTS `sys_refresh_token` (
   `token_jti` VARCHAR(64) NOT NULL COMMENT 'refresh token唯一ID(JTI)',
