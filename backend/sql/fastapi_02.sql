@@ -1,4 +1,16 @@
+/*
+ Navicat Premium Data Transfer
 
+ Source Server Type    : MySQL
+ Source Server Version : 80402 (8.4.2)
+ Source Schema         : fastapi_02
+
+ Target Server Type    : MySQL
+ Target Server Version : 80402 (8.4.2)
+ File Encoding         : 65001
+
+ Date: 23/04/2026 21:05:51
+*/
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -217,45 +229,62 @@ CREATE TABLE `sys_permission`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code_deleted`(`code` ASC, `deleted_at` ASC) USING BTREE COMMENT '权限编码唯一索引',
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE COMMENT '父节点查询索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 48 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统权限表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_permission
 -- ----------------------------
-INSERT INTO `sys_permission` VALUES (1, NULL, '角色查询', 'rbac:role:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (2, NULL, '角色创建', 'rbac:role:create', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (3, NULL, '角色更新', 'rbac:role:update', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (4, NULL, '角色删除', 'rbac:role:delete', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (5, NULL, '权限查询', 'rbac:permission:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (6, NULL, '用户绑定角色', 'rbac:user:bind_role', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (7, NULL, '角色绑定权限', 'rbac:role:bind_permission', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (8, NULL, '学生查询', 'student:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (9, NULL, '学生新增', 'student:create', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (10, NULL, '学生更新', 'student:update', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (11, NULL, '学生删除', 'student:delete', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (12, NULL, '成绩查询', 'score:read', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (13, NULL, '成绩新增', 'score:create', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (14, NULL, '成绩更新', 'score:update', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (15, NULL, '成绩删除', 'score:delete', 'api', '2026-04-22 11:24:56', '2026-04-22 11:24:56', NULL);
-INSERT INTO `sys_permission` VALUES (16, NULL, '班级查询', 'class:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (17, NULL, '班级新增', 'class:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (18, NULL, '班级更新', 'class:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (19, NULL, '班级删除', 'class:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (20, NULL, '课程查询', 'course:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (21, NULL, '课程新增', 'course:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (22, NULL, '课程更新', 'course:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (23, NULL, '课程删除', 'course:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (24, NULL, '就业查询', 'employment:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (25, NULL, '就业新增', 'employment:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (26, NULL, '就业更新', 'employment:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (27, NULL, '就业删除', 'employment:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (28, NULL, '班级授课查询', 'class_teaching:read', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (29, NULL, '班级授课新增', 'class_teaching:create', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (30, NULL, '班级授课更新', 'class_teaching:update', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (31, NULL, '班级授课删除', 'class_teaching:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (32, NULL, 'AI对话', 'ai:chat', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (33, NULL, 'AI Text2SQL', 'ai:text2sql', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
-INSERT INTO `sys_permission` VALUES (47, NULL, '审计日志查询', 'rbac:audit:read', 'api', '2026-04-22 22:17:44', '2026-04-22 22:17:44', NULL);
+INSERT INTO `sys_permission` VALUES (1, NULL, 'RBAC管理', 'rbac', 'group', '2026-04-23 21:04:27', '2026-04-23 21:04:27', NULL);
+INSERT INTO `sys_permission` VALUES (2, NULL, '用户管理', 'user', 'group', '2026-04-23 21:04:27', '2026-04-23 21:04:27', NULL);
+INSERT INTO `sys_permission` VALUES (3, NULL, '学生管理', 'student', 'group', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (4, NULL, '成绩管理', 'score', 'group', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (5, NULL, '班级管理', 'class', 'group', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (6, NULL, '课程管理', 'course', 'group', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (7, NULL, '就业管理', 'employment', 'group', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (8, NULL, '班级授课管理', 'class_teaching', 'group', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (9, NULL, 'AI助手', 'ai', 'group', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (10, 1, '角色查询', 'rbac:role:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (11, 1, '角色创建', 'rbac:role:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (12, 1, '角色更新', 'rbac:role:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (13, 1, '角色删除', 'rbac:role:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (14, 1, '权限查询', 'rbac:permission:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (15, 1, '权限创建', 'rbac:permission:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (16, 1, '权限更新', 'rbac:permission:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (17, 1, '权限删除', 'rbac:permission:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (18, 1, '审计日志查询', 'rbac:audit:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (19, 1, '用户绑定角色', 'rbac:user:bind_role', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (20, 1, '角色绑定权限', 'rbac:role:bind_permission', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (21, 2, '用户查询', 'user:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (22, 2, '用户更新', 'user:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (23, 2, '用户状态管理', 'user:status', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (24, 2, '用户密码重置', 'user:password:reset', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (25, 2, '用户删除', 'user:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (26, 3, '学生查询', 'student:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (27, 3, '学生新增', 'student:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (28, 3, '学生更新', 'student:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (29, 3, '学生删除', 'student:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (30, 4, '成绩查询', 'score:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (31, 4, '成绩新增', 'score:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (32, 4, '成绩更新', 'score:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (33, 4, '成绩删除', 'score:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (34, 5, '班级查询', 'class:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (35, 5, '班级新增', 'class:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (36, 5, '班级更新', 'class:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (37, 5, '班级删除', 'class:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (38, 6, '课程查询', 'course:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (39, 6, '课程新增', 'course:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (40, 6, '课程更新', 'course:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (41, 6, '课程删除', 'course:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (42, 7, '就业查询', 'employment:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (43, 7, '就业新增', 'employment:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (44, 7, '就业更新', 'employment:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (45, 7, '就业删除', 'employment:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (46, 8, '班级授课查询', 'class_teaching:read', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (47, 8, '班级授课新增', 'class_teaching:create', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (48, 8, '班级授课更新', 'class_teaching:update', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (49, 8, '班级授课删除', 'class_teaching:delete', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (50, 9, 'AI对话', 'ai:chat', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
+INSERT INTO `sys_permission` VALUES (51, 9, 'AI Text2SQL', 'ai:text2sql', 'api', '2026-04-23 21:04:28', '2026-04-23 21:04:28', NULL);
 
 -- ----------------------------
 -- Table structure for sys_refresh_token
@@ -280,11 +309,12 @@ CREATE TABLE `sys_refresh_token`  (
 INSERT INTO `sys_refresh_token` VALUES ('0afaa461-3df1-492a-9418-f79b2b580469', 2, '2026-04-29 14:22:58', NULL, NULL, '2026-04-22 22:22:58');
 INSERT INTO `sys_refresh_token` VALUES ('0c411c93-21eb-4b88-a456-4591eedba847', 2, '2026-04-30 07:56:24', NULL, NULL, '2026-04-23 15:56:25');
 INSERT INTO `sys_refresh_token` VALUES ('1c9a0b2a-df31-46b1-9da9-5ca335dc104f', 2, '2026-04-30 08:40:14', NULL, NULL, '2026-04-23 16:40:15');
+INSERT INTO `sys_refresh_token` VALUES ('382256c6-1b0a-45d2-8529-0fd131f8fe58', 2, '2026-04-30 11:50:09', NULL, NULL, '2026-04-23 19:50:10');
 INSERT INTO `sys_refresh_token` VALUES ('4a6e5447-2517-4361-ab86-31287feb6694', 2, '2026-04-30 07:46:35', NULL, NULL, '2026-04-23 15:46:36');
 INSERT INTO `sys_refresh_token` VALUES ('910feba4-d31c-49cb-94fe-d1ee1de90823', 2, '2026-04-29 13:11:53', NULL, NULL, '2026-04-22 21:11:55');
 INSERT INTO `sys_refresh_token` VALUES ('912a922b-b98a-4012-ac40-063815ca1c6b', 2, '2026-04-30 08:38:28', NULL, NULL, '2026-04-23 16:38:29');
 INSERT INTO `sys_refresh_token` VALUES ('a7d1ee2c-1f9b-4ff0-8529-5f3584c2c7a6', 2, '2026-04-30 08:29:28', NULL, NULL, '2026-04-23 16:29:29');
-INSERT INTO `sys_refresh_token` VALUES ('d6338842-dae5-4f4c-930f-ee7275ee7bda', 2, '2026-04-29 10:58:07', NULL, NULL, '2026-04-22 18:58:10');
+INSERT INTO `sys_refresh_token` VALUES ('d6338842-dae5-4f4c-930f-ee7275ee7bda', 2, '2026-04-29 10:58:07', '2026-04-23 19:50:10', '382256c6-1b0a-45d2-8529-0fd131f8fe58', '2026-04-22 18:58:10');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -324,66 +354,90 @@ CREATE TABLE `sys_role_permission`  (
 -- ----------------------------
 -- Records of sys_role_permission
 -- ----------------------------
-INSERT INTO `sys_role_permission` VALUES (1, 1, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 2, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 3, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 4, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 5, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 6, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 7, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 8, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 9, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 10, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 11, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 12, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 13, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 14, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 15, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (1, 16, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 17, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 18, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 19, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 20, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 21, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 22, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 23, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 24, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 25, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 26, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 27, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 28, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 29, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 30, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 31, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 32, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 33, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (1, 47, '2026-04-22 22:17:44');
-INSERT INTO `sys_role_permission` VALUES (2, 8, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 9, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 10, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 11, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 12, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 13, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 14, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 15, '2026-04-22 11:24:56');
-INSERT INTO `sys_role_permission` VALUES (2, 16, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 17, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 18, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 19, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 20, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 21, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 22, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 23, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 24, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 25, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 26, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 27, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 28, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 29, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 30, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 31, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 32, '2026-04-22 11:38:03');
-INSERT INTO `sys_role_permission` VALUES (2, 33, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 1, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 2, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 3, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 4, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 5, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 6, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 7, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 8, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 9, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 10, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 11, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 12, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 13, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 14, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 15, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 16, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 17, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 18, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 19, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 20, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 21, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 22, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 23, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 24, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 25, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 26, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 27, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 28, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 29, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 30, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 31, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 32, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 33, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 34, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 35, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 36, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 37, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 38, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 39, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 40, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 41, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 42, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 43, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 44, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 45, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 46, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 47, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 48, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 49, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 50, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (1, 51, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 3, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 4, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 5, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 6, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 7, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 8, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 9, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 26, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 27, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 28, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 29, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 30, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 31, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 32, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 33, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 34, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 35, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 36, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 37, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 38, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 39, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 40, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 41, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 42, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 43, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 44, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 45, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 46, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 47, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 48, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 49, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 50, '2026-04-23 21:04:28');
+INSERT INTO `sys_role_permission` VALUES (2, 51, '2026-04-23 21:04:28');
 
 -- ----------------------------
 -- Table structure for sys_user
