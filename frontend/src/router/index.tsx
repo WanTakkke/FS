@@ -13,6 +13,7 @@ import { NotFoundPage } from "../pages/NotFoundPage";
 import { RbacPage } from "../pages/RbacPage";
 import { ScorePage } from "../pages/ScorePage";
 import { StudentPage } from "../pages/StudentPage";
+import { UserPage } from "../pages/UserPage";
 import { useAuthStore } from "../store/authStore";
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -43,6 +44,7 @@ export function AppRouter() {
         <Route path="/courses" element={<CoursePage />} />
         <Route path="/ai" element={<AiPage />} />
         <Route path="/rbac" element={<RbacPage />} />
+        <Route path="/users" element={<UserPage />} />
       </Route>
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<Navigate to="/404" replace />} />

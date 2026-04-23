@@ -11,6 +11,7 @@ import {
   RobotOutlined,
   TeamOutlined,
   TrophyOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Button, Space } from "antd";
 
@@ -28,6 +29,7 @@ const menuItems = [
   { key: "/teaching", label: <Link to="/teaching">班级授课</Link>, icon: <FileTextOutlined /> },
   { key: "/courses", label: <Link to="/courses">课程管理</Link>, icon: <BookOutlined /> },
   { key: "/ai", label: <Link to="/ai">AI 助手</Link>, icon: <RobotOutlined /> },
+  { key: "/users", label: <Link to="/users">用户管理</Link>, icon: <UserOutlined /> },
   { key: "/rbac", label: <Link to="/rbac">RBAC 管理</Link>, icon: <SafetyCertificateOutlined /> },
 ];
 

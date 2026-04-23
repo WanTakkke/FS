@@ -13,6 +13,7 @@ import type {
   RoleCreatePayload,
   RolePermissionBindPayload,
   RoleUpdatePayload,
+  UserPageResponse,
   UserRoleBindPayload,
   UserRolePermission,
 } from "../types/rbac";
@@ -82,4 +83,23 @@ export async function bindRolePermissions(payload: RolePermissionBindPayload) {
 export async function queryUserRolePermission(userId: number) {
   assertPositiveInt(userId, "用户ID");
   return unwrapResponse<UserRolePermission>(http.get(`/api/rbac/users/${userId}/permissions`));
+}
+
+export async function listUsers(params?: {
+  page?: number;
+  page_size?: number;
+  username?: string;
+  email?: string;
+  is_active?: number;
+}) {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", params.page.toString());
+  if (params?.page_size) queryParams.append("page_size", params.page_size.toString());
+  if (params?.username) queryParams.append("username", params.username);
+  if (params?.email) queryParams.append("email", params.email);
+  if (params?.is_active !== undefined) queryParams.append("is_active", params.is_active.toString());
+  
+  const queryString = queryParams.toString();
+  const url = queryString ? `/api/user/list?${queryString}` : "/api/user/list";
+  return unwrapResponse<UserPageResponse>(http.get(url));
 }
