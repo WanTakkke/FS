@@ -13,7 +13,7 @@ class StudentRequest(BaseModel):
     hometown: str | None = None
     graduate_school: str | None = None
     major: str | None = None
-    enrollment_date: date
+    enrollment_date: date| None = None
     graduation_date: date | None = None
     education_level: str | None = None
 
@@ -26,14 +26,14 @@ class StudentResponse(BaseModel):
 
     student_code: str
     class_id: int
-    advisor_id: int
+    advisor_id: int| None = None
     name: str
     gender: int
-    age: int
-    hometown: str
-    graduate_school: str
-    major: str
-    enrollment_date: str
+    age: int| None = None
+    hometown: str| None = None
+    graduate_school: str| None = None
+    major: str| None = None
+    enrollment_date: str| None = None
     graduation_date: str | None = None
     education_level: str | None = None
 
