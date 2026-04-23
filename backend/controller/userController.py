@@ -17,7 +17,7 @@ from schema.userSchema import (
 )
 from service import userService
 from mapper import userMapper
-from utils.auth import get_current_user
+from utils.auth import get_current_user, require_permission
 from utils.logger import AppLogger
 
 user_router = APIRouter(prefix="/api/user", tags=["用户模块"])
@@ -55,7 +55,7 @@ async def get_me(current_user: CurrentUserResponse = Depends(get_current_user)):
     return BaseResponse.success(data=current_user)
 
 
-@user_router.get("/list", response_model=BaseResponse[UserPageResponse], description="用户列表")
+@user_router.get("/list", response_model=BaseResponse[UserPageResponse], description="用户列表", dependencies=[Depends(require_permission("user:read"))])
 async def list_users(
     page: int = 1,
     page_size: int = 20,
@@ -80,7 +80,7 @@ async def list_users(
         return BaseResponse.error(code=400, message=str(e))
 
 
-@user_router.get("/{user_id}", response_model=BaseResponse[UserResponse], description="用户详情")
+@user_router.get("/{user_id}", response_model=BaseResponse[UserResponse], description="用户详情", dependencies=[Depends(require_permission("user:read"))])
 async def get_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
@@ -92,7 +92,7 @@ async def get_user(
     return BaseResponse.success(data=UserResponse.model_validate(user))
 
 
-@user_router.put("/{user_id}", response_model=BaseResponse[UserResponse], description="更新用户")
+@user_router.put("/{user_id}", response_model=BaseResponse[UserResponse], description="更新用户", dependencies=[Depends(require_permission("user:update"))])
 async def update_user(
     user_id: int,
     user_data: UserUpdateRequest,
@@ -107,7 +107,7 @@ async def update_user(
         return BaseResponse.error(code=400, message=str(e))
 
 
-@user_router.put("/{user_id}/status", response_model=BaseResponse[UserResponse], description="更新用户状态")
+@user_router.put("/{user_id}/status", response_model=BaseResponse[UserResponse], description="更新用户状态", dependencies=[Depends(require_permission("user:status"))])
 async def update_user_status(
     user_id: int,
     status_data: UserStatusUpdateRequest,
@@ -122,7 +122,7 @@ async def update_user_status(
         return BaseResponse.error(code=400, message=str(e))
 
 
-@user_router.put("/{user_id}/password", response_model=BaseResponse[UserResponse], description="重置用户密码")
+@user_router.put("/{user_id}/password", response_model=BaseResponse[UserResponse], description="重置用户密码", dependencies=[Depends(require_permission("user:password:reset"))])
 async def reset_user_password(
     user_id: int,
     password_data: UserPasswordResetRequest,
@@ -137,7 +137,7 @@ async def reset_user_password(
         return BaseResponse.error(code=400, message=str(e))
 
 
-@user_router.delete("/{user_id}", response_model=BaseResponse[bool], description="删除用户")
+@user_router.delete("/{user_id}", response_model=BaseResponse[bool], description="删除用户", dependencies=[Depends(require_permission("user:delete"))])
 async def delete_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),

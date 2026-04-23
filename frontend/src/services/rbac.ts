@@ -76,13 +76,17 @@ export async function deletePermission(permissionId: number) {
 
 export async function bindUserRoles(payload: UserRoleBindPayload) {
   assertPositiveInt(payload.user_id, "用户ID");
-  assertPositiveIntArray(payload.role_ids, "角色ID列表");
+  if (payload.role_ids.length > 0) {
+    assertPositiveIntArray(payload.role_ids, "角色ID列表");
+  }
   return unwrapResponse<boolean>(http.post("/api/rbac/users/roles", payload));
 }
 
 export async function bindRolePermissions(payload: RolePermissionBindPayload) {
   assertPositiveInt(payload.role_id, "角色ID");
-  assertPositiveIntArray(payload.permission_ids, "权限ID列表");
+  if (payload.permission_ids.length > 0) {
+    assertPositiveIntArray(payload.permission_ids, "权限ID列表");
+  }
   return unwrapResponse<boolean>(http.post("/api/rbac/roles/permissions", payload));
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -220,13 +220,16 @@ export function RbacPage() {
 
   const handleUserChange = (userId: number) => {
     setSelectedUserId(userId);
-    if (userPermissionQuery.data) {
+  };
+
+  useEffect(() => {
+    if (selectedUserId && userPermissionQuery.data) {
       const roleIds = (rolesQuery.data ?? [])
         .filter((role: Role) => userPermissionQuery.data.roles.includes(role.code))
         .map((role: Role) => role.id);
       setCheckedRoleIds(roleIds);
     }
-  };
+  }, [selectedUserId, userPermissionQuery.data, rolesQuery.data]);
 
   const handleRoleChange = async (roleId: number) => {
     setSelectedRoleId(roleId);
@@ -346,29 +349,6 @@ export function RbacPage() {
     [deletePermMutation, permForm]
   );
 
-  const userColumns = useMemo(
-    () => [
-      { title: "ID", dataIndex: "id", key: "id", width: 80 },
-      { title: "用户名", dataIndex: "username", key: "username" },
-      { title: "邮箱", dataIndex: "email", key: "email" },
-      {
-        title: "状态",
-        dataIndex: "is_active",
-        key: "is_active",
-        width: 100,
-        render: (v: number) =>
-          v === 1 ? <Tag color="green">启用</Tag> : <Tag color="red">禁用</Tag>,
-      },
-      {
-        title: "创建时间",
-        dataIndex: "created_at",
-        key: "created_at",
-        width: 180,
-      },
-    ],
-    []
-  );
-
   return (
     <Card title={<Typography.Title level={5} style={{ margin: 0 }}>RBAC 权限管理</Typography.Title>}>
       <Tabs
@@ -483,7 +463,6 @@ export function RbacPage() {
                             checkedKeys={checkedPermissionIds}
                             onCheck={handlePermissionCheck}
                             treeData={treeData}
-                            defaultExpandAll
                           />
                         </div>
                         <Button
@@ -538,23 +517,6 @@ export function RbacPage() {
                   columns={permColumns}
                 />
               </>
-            ),
-          },
-          {
-            key: "users",
-            label: "用户列表",
-            children: (
-              <Table
-                rowKey="id"
-                loading={usersQuery.isLoading}
-                dataSource={usersQuery.data?.records ?? []}
-                columns={userColumns}
-                pagination={{
-                  total: usersQuery.data?.total ?? 0,
-                  pageSize: 100,
-                  showTotal: (total) => `共 ${total} 条`,
-                }}
-              />
             ),
           },
         ]}
