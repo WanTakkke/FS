@@ -93,6 +93,21 @@ async def soft_delete_role(db: AsyncSession, role_id: int):
     return True
 
 
+async def get_role_permission_ids(db: AsyncSession, role_id: int) -> list[int]:
+    result = await db.execute(
+        text(
+            """
+            SELECT permission_id
+            FROM sys_role_permission
+            WHERE role_id = :role_id
+            ORDER BY permission_id ASC
+            """
+        ),
+        {"role_id": role_id},
+    )
+    return [int(row[0]) for row in result.all()]
+
+
 async def list_permissions(db: AsyncSession):
     result = await db.execute(
         text(

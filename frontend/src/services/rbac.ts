@@ -42,6 +42,11 @@ export async function deleteRole(roleId: number) {
   return unwrapResponse<boolean>(http.delete(`/api/rbac/roles/${roleId}`));
 }
 
+export async function getRolePermissions(roleId: number) {
+  assertPositiveInt(roleId, "角色ID");
+  return unwrapResponse<number[]>(http.get(`/api/rbac/roles/${roleId}/permissions`));
+}
+
 export async function listPermissions() {
   return unwrapResponse<Permission[]>(http.get("/api/rbac/permissions"));
 }
@@ -128,6 +133,6 @@ export async function listAuditLogs(params?: {
   if (params?.end_time) queryParams.append("end_time", params.end_time);
   
   const queryString = queryParams.toString();
-  const url = queryString ? `/api/rbac/audit-logs?${queryString}` : "/api/rbac/audit-logs";
+  const url = queryString ? `/api/rbac/audit/logs?${queryString}` : "/api/rbac/audit/logs";
   return unwrapResponse<AuditLogPageResponse>(http.get(url));
 }

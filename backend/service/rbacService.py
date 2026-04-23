@@ -86,6 +86,14 @@ async def update_role(db: AsyncSession, role_data: RoleUpdateRequest, operator: 
     return RoleResponse.model_validate(result)
 
 
+async def get_role_permissions(db: AsyncSession, role_id: int):
+    role = await rbacMapper.get_role_by_id(db, role_id)
+    if not role:
+        raise ValueError(f"角色ID {role_id} 不存在")
+    permission_ids = await rbacMapper.get_role_permission_ids(db, role_id)
+    return permission_ids
+
+
 async def delete_role(db: AsyncSession, role_id: int, operator: CurrentUserResponse | None = None):
     exists = await rbacMapper.get_role_by_id(db, role_id)
     if not exists:

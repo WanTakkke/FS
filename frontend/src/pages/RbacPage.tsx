@@ -29,6 +29,7 @@ import {
   deletePermission,
   deleteRole,
   getPermissionTree,
+  getRolePermissions,
   listPermissions,
   listRoles,
   listUsers,
@@ -227,8 +228,15 @@ export function RbacPage() {
     }
   };
 
-  const handleRoleChange = (roleId: number) => {
+  const handleRoleChange = async (roleId: number) => {
     setSelectedRoleId(roleId);
+    try {
+      const permissionIds = await getRolePermissions(roleId);
+      setCheckedPermissionIds(permissionIds);
+    } catch (error) {
+      console.error("获取角色权限失败:", error);
+      setCheckedPermissionIds([]);
+    }
   };
 
   const handlePermissionCheck = (checkedKeys: any) => {
@@ -336,6 +344,29 @@ export function RbacPage() {
       },
     ],
     [deletePermMutation, permForm]
+  );
+
+  const userColumns = useMemo(
+    () => [
+      { title: "ID", dataIndex: "id", key: "id", width: 80 },
+      { title: "用户名", dataIndex: "username", key: "username" },
+      { title: "邮箱", dataIndex: "email", key: "email" },
+      {
+        title: "状态",
+        dataIndex: "is_active",
+        key: "is_active",
+        width: 100,
+        render: (v: number) =>
+          v === 1 ? <Tag color="green">启用</Tag> : <Tag color="red">禁用</Tag>,
+      },
+      {
+        title: "创建时间",
+        dataIndex: "created_at",
+        key: "created_at",
+        width: 180,
+      },
+    ],
+    []
   );
 
   return (
@@ -507,6 +538,23 @@ export function RbacPage() {
                   columns={permColumns}
                 />
               </>
+            ),
+          },
+          {
+            key: "users",
+            label: "用户列表",
+            children: (
+              <Table
+                rowKey="id"
+                loading={usersQuery.isLoading}
+                dataSource={usersQuery.data?.records ?? []}
+                columns={userColumns}
+                pagination={{
+                  total: usersQuery.data?.total ?? 0,
+                  pageSize: 100,
+                  showTotal: (total) => `共 ${total} 条`,
+                }}
+              />
             ),
           },
         ]}

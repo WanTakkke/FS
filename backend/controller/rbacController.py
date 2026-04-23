@@ -78,6 +78,20 @@ async def delete_role(
         return BaseResponse.error(code=400, message=str(e))
 
 
+@rbac_router.get("/roles/{role_id}/permissions", response_model=BaseResponse[List[int]], dependencies=[Depends(require_permission("rbac:role:read"))])
+async def get_role_permissions(
+    role_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """获取角色的权限ID列表"""
+    try:
+        result = await rbacService.get_role_permissions(db, role_id)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("获取角色权限失败: role_id=%s reason=%s", role_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
 @rbac_router.get("/permissions", response_model=BaseResponse[List[PermissionResponse]], dependencies=[Depends(require_permission("rbac:permission:read"))])
 async def list_permissions(db: AsyncSession = Depends(get_db)):
     """权限列表"""
