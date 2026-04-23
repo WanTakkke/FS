@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from mapper import userMapper, rbacMapper
 from models.userInfo import SysUser
-from schema.userSchema import UserRegisterRequest, UserLoginRequest, UserResponse, TokenResponse
+from schema.userSchema import UserRegisterRequest, UserLoginRequest, UserResponse, TokenResponse, UserPageResponse
 
 import os
 from dotenv import load_dotenv
@@ -167,3 +167,65 @@ async def refresh_access_token(db: AsyncSession, refresh_token: str) -> TokenRes
         token_type="bearer",
         expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
+
+
+async def list_users(
+    db: AsyncSession,
+    page: int = 1,
+    page_size: int = 20,
+    username: str | None = None,
+    email: str | None = None,
+    is_active: int | None = None,
+):
+    if page < 1:
+        raise ValueError("page 必须大于等于 1")
+    if page_size < 1 or page_size > 200:
+        raise ValueError("page_size 必须在 1~200 之间")
+    
+    total, records = await userMapper.list_users(
+        db,
+        page=page,
+        page_size=page_size,
+        username=username,
+        email=email,
+        is_active=is_active,
+    )
+    return UserPageResponse(
+        total=total,
+        page=page,
+        page_size=page_size,
+        records=[UserResponse.model_validate(item) for item in records],
+    )
+
+
+async def update_user(db: AsyncSession, user_id: int, email: str | None):
+    user = await userMapper.get_user_by_id(db, user_id)
+    if not user:
+        raise ValueError(f"用户ID {user_id} 不存在")
+    result = await userMapper.update_user(db, user_id=user_id, email=email)
+    return UserResponse.model_validate(result)
+
+
+async def update_user_status(db: AsyncSession, user_id: int, is_active: int):
+    user = await userMapper.get_user_by_id(db, user_id)
+    if not user:
+        raise ValueError(f"用户ID {user_id} 不存在")
+    result = await userMapper.update_user_status(db, user_id=user_id, is_active=is_active)
+    return UserResponse.model_validate(result)
+
+
+async def reset_user_password(db: AsyncSession, user_id: int, new_password: str):
+    user = await userMapper.get_user_by_id(db, user_id)
+    if not user:
+        raise ValueError(f"用户ID {user_id} 不存在")
+    hashed_password = get_password_hash(new_password)
+    result = await userMapper.update_user_password(db, user_id=user_id, hashed_password=hashed_password)
+    return UserResponse.model_validate(result)
+
+
+async def delete_user(db: AsyncSession, user_id: int):
+    user = await userMapper.get_user_by_id(db, user_id)
+    if not user:
+        raise ValueError(f"用户ID {user_id} 不存在")
+    result = await userMapper.soft_delete_user(db, user_id=user_id)
+    return result

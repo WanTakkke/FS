@@ -10,11 +10,18 @@ from schema.userSchema import (
     TokenResponse,
     RefreshTokenRequest,
     CurrentUserResponse,
+    UserUpdateRequest,
+    UserStatusUpdateRequest,
+    UserPasswordResetRequest,
+    UserPageResponse,
 )
 from service import userService
+from mapper import userMapper
 from utils.auth import get_current_user
+from utils.logger import AppLogger
 
 user_router = APIRouter(prefix="/api/user", tags=["用户模块"])
+logger = AppLogger.get_logger(__name__)
 
 
 @user_router.post("/register", response_model=BaseResponse[UserResponse], description="用户注册")
@@ -46,3 +53,99 @@ async def refresh_token(data: RefreshTokenRequest, db: AsyncSession = Depends(ge
 @user_router.get("/me", response_model=BaseResponse[CurrentUserResponse], description="获取当前用户信息")
 async def get_me(current_user: CurrentUserResponse = Depends(get_current_user)):
     return BaseResponse.success(data=current_user)
+
+
+@user_router.get("/list", response_model=BaseResponse[UserPageResponse], description="用户列表")
+async def list_users(
+    page: int = 1,
+    page_size: int = 20,
+    username: str | None = None,
+    email: str | None = None,
+    is_active: int | None = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    try:
+        result = await userService.list_users(
+            db,
+            page=page,
+            page_size=page_size,
+            username=username,
+            email=email,
+            is_active=is_active,
+        )
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("查询用户列表失败: reason=%s", str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@user_router.get("/{user_id}", response_model=BaseResponse[UserResponse], description="用户详情")
+async def get_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    user = await userMapper.get_user_by_id(db, user_id)
+    if not user:
+        return BaseResponse.error(code=404, message="用户不存在")
+    return BaseResponse.success(data=UserResponse.model_validate(user))
+
+
+@user_router.put("/{user_id}", response_model=BaseResponse[UserResponse], description="更新用户")
+async def update_user(
+    user_id: int,
+    user_data: UserUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    try:
+        result = await userService.update_user(db, user_id, user_data.email)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("更新用户失败: user_id=%s reason=%s", user_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@user_router.put("/{user_id}/status", response_model=BaseResponse[UserResponse], description="更新用户状态")
+async def update_user_status(
+    user_id: int,
+    status_data: UserStatusUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    try:
+        result = await userService.update_user_status(db, user_id, status_data.is_active)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("更新用户状态失败: user_id=%s reason=%s", user_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@user_router.put("/{user_id}/password", response_model=BaseResponse[UserResponse], description="重置用户密码")
+async def reset_user_password(
+    user_id: int,
+    password_data: UserPasswordResetRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    try:
+        result = await userService.reset_user_password(db, user_id, password_data.new_password)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("重置用户密码失败: user_id=%s reason=%s", user_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@user_router.delete("/{user_id}", response_model=BaseResponse[bool], description="删除用户")
+async def delete_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    try:
+        await userService.delete_user(db, user_id)
+        return BaseResponse.success()
+    except ValueError as e:
+        logger.warning("删除用户失败: user_id=%s reason=%s", user_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))

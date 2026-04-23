@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class UserRegisterRequest(BaseModel):
@@ -51,3 +51,22 @@ class UserResponse(BaseModel):
     @property
     def password(self):
         return None
+
+
+class UserUpdateRequest(BaseModel):
+    email: str | None = None
+
+
+class UserStatusUpdateRequest(BaseModel):
+    is_active: int = Field(ge=0, le=1)
+
+
+class UserPasswordResetRequest(BaseModel):
+    new_password: str = Field(min_length=6, max_length=50)
+
+
+class UserPageResponse(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    records: list[UserResponse]

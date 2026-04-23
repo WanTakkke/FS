@@ -144,3 +144,111 @@ def is_refresh_record_active(record: dict) -> bool:
     if expires_at is None:
         return False
     return expires_at.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc)
+
+
+async def list_users(
+    db: AsyncSession,
+    page: int,
+    page_size: int,
+    username: str | None = None,
+    email: str | None = None,
+    is_active: int | None = None,
+):
+    where_sql = ["deleted_at IS NULL"]
+    params: dict[str, object] = {
+        "offset": (page - 1) * page_size,
+        "page_size": page_size,
+    }
+    
+    if username:
+        where_sql.append("username LIKE :username")
+        params["username"] = f"%{username}%"
+    if email:
+        where_sql.append("email LIKE :email")
+        params["email"] = f"%{email}%"
+    if is_active is not None:
+        where_sql.append("is_active = :is_active")
+        params["is_active"] = is_active
+    
+    where_clause = " AND ".join(where_sql)
+    count_sql = f"SELECT COUNT(1) FROM sys_user WHERE {where_clause}"
+    list_sql = f"""
+        SELECT id, username, email, is_active, created_at, updated_at
+        FROM sys_user
+        WHERE {where_clause}
+        ORDER BY id DESC
+        LIMIT :offset, :page_size
+    """
+    
+    total_result = await db.execute(text(count_sql), params)
+    total = int(total_result.scalar_one() or 0)
+    records_result = await db.execute(text(list_sql), params)
+    records = records_result.mappings().all()
+    return total, records
+
+
+async def update_user(db: AsyncSession, user_id: int, email: str | None):
+    updates: list[str] = []
+    params: dict[str, object] = {"user_id": user_id}
+    
+    if email is not None:
+        updates.append("email = :email")
+        params["email"] = email
+    
+    if not updates:
+        return await get_user_by_id(db, user_id)
+    
+    updates.append("updated_at = NOW()")
+    sql = f"UPDATE sys_user SET {', '.join(updates)} WHERE id = :user_id AND deleted_at IS NULL"
+    await db.execute(text(sql), params)
+    await db.commit()
+    return await get_user_by_id(db, user_id)
+
+
+async def update_user_status(db: AsyncSession, user_id: int, is_active: int):
+    await db.execute(
+        text(
+            """
+            UPDATE sys_user
+            SET is_active = :is_active, updated_at = NOW()
+            WHERE id = :user_id AND deleted_at IS NULL
+            """
+        ),
+        {"user_id": user_id, "is_active": is_active},
+    )
+    await db.commit()
+    return await get_user_by_id(db, user_id)
+
+
+async def update_user_password(db: AsyncSession, user_id: int, hashed_password: str):
+    await db.execute(
+        text(
+            """
+            UPDATE sys_user
+            SET hashed_password = :hashed_password, updated_at = NOW()
+            WHERE id = :user_id AND deleted_at IS NULL
+            """
+        ),
+        {"user_id": user_id, "hashed_password": hashed_password},
+    )
+    await db.commit()
+    return await get_user_by_id(db, user_id)
+
+
+async def soft_delete_user(db: AsyncSession, user_id: int):
+    await db.execute(
+        text(
+            """
+            UPDATE sys_user
+            SET deleted_at = NOW(), updated_at = NOW()
+            WHERE id = :user_id AND deleted_at IS NULL
+            """
+        ),
+        {"user_id": user_id},
+    )
+    await db.execute(
+        text("DELETE FROM sys_user_role WHERE user_id = :user_id"),
+        {"user_id": user_id},
+    )
+    await db.commit()
+    return True

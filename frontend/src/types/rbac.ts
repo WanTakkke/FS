@@ -22,6 +22,33 @@ export interface CurrentUser {
   permissions: string[];
 }
 
+export interface User {
+  id: number;
+  username: string;
+  email?: string | null;
+  is_active: number;
+  created_at?: string | null;
+}
+
+export interface UserPageResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  records: User[];
+}
+
+export interface UserUpdatePayload {
+  email?: string;
+}
+
+export interface UserStatusUpdatePayload {
+  is_active: number;
+}
+
+export interface UserPasswordResetPayload {
+  new_password: string;
+}
+
 export interface Role {
   id: number;
   name: string;
