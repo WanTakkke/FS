@@ -20,6 +20,6 @@ class StudentInfo(Base):
     hometown: Mapped[str | None] = mapped_column(String(100),nullable=True,comment="籍贯")
     graduate_school: Mapped[str | None] = mapped_column(String(100),nullable=True,comment="毕业院校")
     major: Mapped[str | None] = mapped_column(String(100),nullable=True,comment="专业")
-    enrollment_date: Mapped[date] = mapped_column(Date,nullable=False,comment="入学时间")
+    enrollment_date: Mapped[date] = mapped_column(Date,comment="入学时间")
     graduation_date: Mapped[date | None] = mapped_column(Date,nullable=True,comment="毕业时间")
     education_level: Mapped[str | None] = mapped_column(String(50),nullable=True,comment="学历")

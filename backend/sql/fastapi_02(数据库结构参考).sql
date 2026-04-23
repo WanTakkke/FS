@@ -1,16 +1,4 @@
-/*
- Navicat Premium Data Transfer
 
- Source Server Type    : MySQL
- Source Server Version : 80402 (8.4.2)
- Source Schema         : fastapi_02
-
- Target Server Type    : MySQL
- Target Server Version : 80402 (8.4.2)
- File Encoding         : 65001
-
- Date: 22/04/2026 16:34:32
-*/
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -165,7 +153,7 @@ CREATE TABLE `students`  (
   `hometown` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '籍贯',
   `graduate_school` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '毕业院校',
   `major` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '专业',
-  `enrollment_date` date NOT NULL COMMENT '入学时间',
+  `enrollment_date` date NULL DEFAULT NULL COMMENT '入学时间',
   `graduation_date` date NULL DEFAULT NULL COMMENT '毕业时间',
   `education_level` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '学历',
   `is_deleted` tinyint(1) NULL DEFAULT 0 COMMENT '逻辑删除标志',
@@ -173,7 +161,7 @@ CREATE TABLE `students`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `student_code`(`student_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '学生基本信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '学生基本信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of students
@@ -182,6 +170,12 @@ INSERT INTO `students` VALUES (4, '废弃', 1, 100, '李四', 1, 20, '北京', '
 INSERT INTO `students` VALUES (5, 'S2026001', 1, 2, '李四', 1, 23, '北京', '北京大学', '计算机科学', '2026-03-05', NULL, '本科', 0, '2026-04-20 19:43:51', '2026-04-20 19:49:42');
 INSERT INTO `students` VALUES (6, 'S2026002', 1, 3, '王五', 0, 22, '上海', '复旦大学', '软件工程', '2026-03-06', NULL, '本科', 0, '2026-04-20 19:43:51', '2026-04-20 19:49:44');
 INSERT INTO `students` VALUES (7, 'S2026003', 2, 1, '赵六', 1, 24, '广州', '中山大学', '信息管理', '2026-04-02', NULL, '本科', 0, '2026-04-20 19:43:51', '2026-04-20 19:49:46');
+INSERT INTO `students` VALUES (8, 'S2026005', 2, NULL, '超级', 1, NULL, NULL, NULL, NULL, '2026-04-23', NULL, NULL, 0, '2026-04-23 16:13:40', '2026-04-23 16:13:40');
+INSERT INTO `students` VALUES (9, 'S2026006', 2, NULL, '2026-3-02', 1, NULL, NULL, NULL, NULL, '2026-04-23', NULL, NULL, 0, '2026-04-23 16:22:51', '2026-04-23 16:22:51');
+INSERT INTO `students` VALUES (10, 'S2026007', 2, NULL, '2026-3-02', 1, NULL, NULL, NULL, NULL, '2026-04-23', NULL, NULL, 0, '2026-04-23 16:29:39', '2026-04-23 16:29:39');
+INSERT INTO `students` VALUES (11, 'S2026008', 2, NULL, '2026-3-02', 1, NULL, NULL, NULL, NULL, '2026-04-23', NULL, NULL, 0, '2026-04-23 16:37:39', '2026-04-23 16:37:39');
+INSERT INTO `students` VALUES (12, 'S2026009', 2, NULL, '2026-3-02', 1, NULL, NULL, NULL, NULL, '2026-04-23', NULL, NULL, 0, '2026-04-23 16:40:40', '2026-04-23 16:40:40');
+INSERT INTO `students` VALUES (13, 'S2026011', 1, NULL, '哈哈', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '2026-04-23 17:13:01', '2026-04-23 17:13:01');
 
 -- ----------------------------
 -- Table structure for sys_audit_log
@@ -201,7 +195,7 @@ CREATE TABLE `sys_audit_log`  (
   INDEX `idx_sal_module_action`(`module` ASC, `action` ASC) USING BTREE,
   INDEX `idx_sal_operator_id`(`operator_id` ASC) USING BTREE,
   INDEX `idx_sal_created_at`(`created_at` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统审计日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统审计日志表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_audit_log
@@ -223,7 +217,7 @@ CREATE TABLE `sys_permission`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_code_deleted`(`code` ASC, `deleted_at` ASC) USING BTREE COMMENT '权限编码唯一索引',
   INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE COMMENT '父节点查询索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 47 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 48 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统权限表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_permission
@@ -261,6 +255,7 @@ INSERT INTO `sys_permission` VALUES (30, NULL, '班级授课更新', 'class_teac
 INSERT INTO `sys_permission` VALUES (31, NULL, '班级授课删除', 'class_teaching:delete', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
 INSERT INTO `sys_permission` VALUES (32, NULL, 'AI对话', 'ai:chat', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
 INSERT INTO `sys_permission` VALUES (33, NULL, 'AI Text2SQL', 'ai:text2sql', 'api', '2026-04-22 11:38:03', '2026-04-22 11:38:03', NULL);
+INSERT INTO `sys_permission` VALUES (47, NULL, '审计日志查询', 'rbac:audit:read', 'api', '2026-04-22 22:17:44', '2026-04-22 22:17:44', NULL);
 
 -- ----------------------------
 -- Table structure for sys_refresh_token
@@ -282,6 +277,14 @@ CREATE TABLE `sys_refresh_token`  (
 -- ----------------------------
 -- Records of sys_refresh_token
 -- ----------------------------
+INSERT INTO `sys_refresh_token` VALUES ('0afaa461-3df1-492a-9418-f79b2b580469', 2, '2026-04-29 14:22:58', NULL, NULL, '2026-04-22 22:22:58');
+INSERT INTO `sys_refresh_token` VALUES ('0c411c93-21eb-4b88-a456-4591eedba847', 2, '2026-04-30 07:56:24', NULL, NULL, '2026-04-23 15:56:25');
+INSERT INTO `sys_refresh_token` VALUES ('1c9a0b2a-df31-46b1-9da9-5ca335dc104f', 2, '2026-04-30 08:40:14', NULL, NULL, '2026-04-23 16:40:15');
+INSERT INTO `sys_refresh_token` VALUES ('4a6e5447-2517-4361-ab86-31287feb6694', 2, '2026-04-30 07:46:35', NULL, NULL, '2026-04-23 15:46:36');
+INSERT INTO `sys_refresh_token` VALUES ('910feba4-d31c-49cb-94fe-d1ee1de90823', 2, '2026-04-29 13:11:53', NULL, NULL, '2026-04-22 21:11:55');
+INSERT INTO `sys_refresh_token` VALUES ('912a922b-b98a-4012-ac40-063815ca1c6b', 2, '2026-04-30 08:38:28', NULL, NULL, '2026-04-23 16:38:29');
+INSERT INTO `sys_refresh_token` VALUES ('a7d1ee2c-1f9b-4ff0-8529-5f3584c2c7a6', 2, '2026-04-30 08:29:28', NULL, NULL, '2026-04-23 16:29:29');
+INSERT INTO `sys_refresh_token` VALUES ('d6338842-dae5-4f4c-930f-ee7275ee7bda', 2, '2026-04-29 10:58:07', NULL, NULL, '2026-04-22 18:58:10');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -354,6 +357,7 @@ INSERT INTO `sys_role_permission` VALUES (1, 30, '2026-04-22 11:38:03');
 INSERT INTO `sys_role_permission` VALUES (1, 31, '2026-04-22 11:38:03');
 INSERT INTO `sys_role_permission` VALUES (1, 32, '2026-04-22 11:38:03');
 INSERT INTO `sys_role_permission` VALUES (1, 33, '2026-04-22 11:38:03');
+INSERT INTO `sys_role_permission` VALUES (1, 47, '2026-04-22 22:17:44');
 INSERT INTO `sys_role_permission` VALUES (2, 8, '2026-04-22 11:24:56');
 INSERT INTO `sys_role_permission` VALUES (2, 9, '2026-04-22 11:24:56');
 INSERT INTO `sys_role_permission` VALUES (2, 10, '2026-04-22 11:24:56');
@@ -394,6 +398,7 @@ CREATE TABLE `sys_user`  (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间，NULL表示未删除',
+  `perm_version` bigint NOT NULL DEFAULT 1 COMMENT '权限版本号',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_username_deleted`(`username` ASC, `deleted_at` ASC) USING BTREE COMMENT '用户名唯一索引(兼容软删除)',
   UNIQUE INDEX `uk_email_deleted`(`email` ASC, `deleted_at` ASC) USING BTREE COMMENT '邮箱唯一索引(兼容软删除)',
@@ -403,9 +408,9 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (2, 'admin', '$2b$12$8E3LmZ.GpLpEUFlPvUCeZulwao/0qsnw52YxcrPI2q23VOOHsOxaK', NULL, 1, '2026-04-17 21:07:43', '2026-04-17 21:07:43', NULL);
-INSERT INTO `sys_user` VALUES (3, '张三', '$2b$12$K17iyNtPNiI59lkKwCHIHOW2U4TRlpkjnqFTstfST/Nm.rGrYPlVG', NULL, 1, '2026-04-17 21:08:41', '2026-04-17 21:08:41', NULL);
-INSERT INTO `sys_user` VALUES (4, '李四', '$2b$12$fimy5f.AeJueZFI1hN2a5uEsZ78iUJFQ1V.8ZYnr3k9nA5mLCPiLm', '123@qq.com', 1, '2026-04-17 21:20:00', '2026-04-17 21:20:00', NULL);
+INSERT INTO `sys_user` VALUES (2, 'admin', '$2b$12$8E3LmZ.GpLpEUFlPvUCeZulwao/0qsnw52YxcrPI2q23VOOHsOxaK', NULL, 1, '2026-04-17 21:07:43', '2026-04-17 21:07:43', NULL, 1);
+INSERT INTO `sys_user` VALUES (3, '张三', '$2b$12$K17iyNtPNiI59lkKwCHIHOW2U4TRlpkjnqFTstfST/Nm.rGrYPlVG', NULL, 1, '2026-04-17 21:08:41', '2026-04-17 21:08:41', NULL, 1);
+INSERT INTO `sys_user` VALUES (4, '李四', '$2b$12$fimy5f.AeJueZFI1hN2a5uEsZ78iUJFQ1V.8ZYnr3k9nA5mLCPiLm', '123@qq.com', 1, '2026-04-17 21:20:00', '2026-04-17 21:20:00', NULL, 1);
 
 -- ----------------------------
 -- Table structure for sys_user_role
