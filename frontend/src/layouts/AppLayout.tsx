@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { Layout, Menu, Spin, Typography } from "antd";
 import {
   ApartmentOutlined,
+  AuditOutlined,
   BarChartOutlined,
   BookOutlined,
   LogoutOutlined,
@@ -31,6 +32,7 @@ const menuItems = [
   { key: "/ai", label: <Link to="/ai">AI 助手</Link>, icon: <RobotOutlined /> },
   { key: "/users", label: <Link to="/users">用户管理</Link>, icon: <UserOutlined /> },
   { key: "/rbac", label: <Link to="/rbac">RBAC 管理</Link>, icon: <SafetyCertificateOutlined /> },
+  { key: "/audit-logs", label: <Link to="/audit-logs">审计日志</Link>, icon: <AuditOutlined /> },
 ];
 
 export function AppLayout() {

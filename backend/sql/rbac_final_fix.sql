@@ -1,0 +1,144 @@
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 彻底清理所有权限数据
+DELETE FROM sys_role_permission;
+TRUNCATE TABLE sys_permission;
+
+-- 创建权限组节点
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, 'RBAC管理', 'rbac', 'group', NOW(), NOW(), NULL);
+SET @rbac_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, '用户管理', 'user', 'group', NOW(), NOW(), NULL);
+SET @user_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, '学生管理', 'student', 'group', NOW(), NOW(), NULL);
+SET @student_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, '成绩管理', 'score', 'group', NOW(), NOW(), NULL);
+SET @score_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, '班级管理', 'class', 'group', NOW(), NOW(), NULL);
+SET @class_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, '课程管理', 'course', 'group', NOW(), NOW(), NULL);
+SET @course_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, '就业管理', 'employment', 'group', NOW(), NOW(), NULL);
+SET @employment_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, '班级授课管理', 'class_teaching', 'group', NOW(), NOW(), NULL);
+SET @class_teaching_id = LAST_INSERT_ID();
+
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+(NULL, 'AI助手', 'ai', 'group', NOW(), NOW(), NULL);
+SET @ai_id = LAST_INSERT_ID();
+
+-- 创建所有子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+VALUES
+-- RBAC管理子权限
+(@rbac_id, '角色查询', 'rbac:role:read', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '角色创建', 'rbac:role:create', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '角色更新', 'rbac:role:update', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '角色删除', 'rbac:role:delete', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '权限查询', 'rbac:permission:read', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '权限创建', 'rbac:permission:create', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '权限更新', 'rbac:permission:update', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '权限删除', 'rbac:permission:delete', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '审计日志查询', 'rbac:audit:read', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '用户绑定角色', 'rbac:user:bind_role', 'api', NOW(), NOW(), NULL),
+(@rbac_id, '角色绑定权限', 'rbac:role:bind_permission', 'api', NOW(), NOW(), NULL),
+-- 用户管理子权限
+(@user_id, '用户查询', 'user:read', 'api', NOW(), NOW(), NULL),
+(@user_id, '用户更新', 'user:update', 'api', NOW(), NOW(), NULL),
+(@user_id, '用户状态管理', 'user:status', 'api', NOW(), NOW(), NULL),
+(@user_id, '用户密码重置', 'user:password:reset', 'api', NOW(), NOW(), NULL),
+(@user_id, '用户删除', 'user:delete', 'api', NOW(), NOW(), NULL),
+-- 学生管理子权限
+(@student_id, '学生查询', 'student:read', 'api', NOW(), NOW(), NULL),
+(@student_id, '学生新增', 'student:create', 'api', NOW(), NOW(), NULL),
+(@student_id, '学生更新', 'student:update', 'api', NOW(), NOW(), NULL),
+(@student_id, '学生删除', 'student:delete', 'api', NOW(), NOW(), NULL),
+-- 成绩管理子权限
+(@score_id, '成绩查询', 'score:read', 'api', NOW(), NOW(), NULL),
+(@score_id, '成绩新增', 'score:create', 'api', NOW(), NOW(), NULL),
+(@score_id, '成绩更新', 'score:update', 'api', NOW(), NOW(), NULL),
+(@score_id, '成绩删除', 'score:delete', 'api', NOW(), NOW(), NULL),
+-- 班级管理子权限
+(@class_id, '班级查询', 'class:read', 'api', NOW(), NOW(), NULL),
+(@class_id, '班级新增', 'class:create', 'api', NOW(), NOW(), NULL),
+(@class_id, '班级更新', 'class:update', 'api', NOW(), NOW(), NULL),
+(@class_id, '班级删除', 'class:delete', 'api', NOW(), NOW(), NULL),
+-- 课程管理子权限
+(@course_id, '课程查询', 'course:read', 'api', NOW(), NOW(), NULL),
+(@course_id, '课程新增', 'course:create', 'api', NOW(), NOW(), NULL),
+(@course_id, '课程更新', 'course:update', 'api', NOW(), NOW(), NULL),
+(@course_id, '课程删除', 'course:delete', 'api', NOW(), NOW(), NULL),
+-- 就业管理子权限
+(@employment_id, '就业查询', 'employment:read', 'api', NOW(), NOW(), NULL),
+(@employment_id, '就业新增', 'employment:create', 'api', NOW(), NOW(), NULL),
+(@employment_id, '就业更新', 'employment:update', 'api', NOW(), NOW(), NULL),
+(@employment_id, '就业删除', 'employment:delete', 'api', NOW(), NOW(), NULL),
+-- 班级授课管理子权限
+(@class_teaching_id, '班级授课查询', 'class_teaching:read', 'api', NOW(), NOW(), NULL),
+(@class_teaching_id, '班级授课新增', 'class_teaching:create', 'api', NOW(), NOW(), NULL),
+(@class_teaching_id, '班级授课更新', 'class_teaching:update', 'api', NOW(), NOW(), NULL),
+(@class_teaching_id, '班级授课删除', 'class_teaching:delete', 'api', NOW(), NOW(), NULL),
+-- AI助手子权限
+(@ai_id, 'AI对话', 'ai:chat', 'api', NOW(), NOW(), NULL),
+(@ai_id, 'AI Text2SQL', 'ai:text2sql', 'api', NOW(), NOW(), NULL);
+
+-- 赋权：admin 拥有全部权限
+INSERT INTO sys_role_permission(role_id, permission_id, created_at)
+SELECT r.id, p.id, NOW()
+FROM sys_role r
+CROSS JOIN sys_permission p
+WHERE r.code = 'admin' AND r.deleted_at IS NULL AND p.deleted_at IS NULL;
+
+-- 赋权：teacher 拥有主要业务模块权限
+INSERT INTO sys_role_permission(role_id, permission_id, created_at)
+SELECT r.id, p.id, NOW()
+FROM sys_role r
+JOIN sys_permission p ON p.code IN (
+    'student', 'student:read', 'student:create', 'student:update', 'student:delete',
+    'score', 'score:read', 'score:create', 'score:update', 'score:delete',
+    'class', 'class:read', 'class:create', 'class:update', 'class:delete',
+    'course', 'course:read', 'course:create', 'course:update', 'course:delete',
+    'employment', 'employment:read', 'employment:create', 'employment:update', 'employment:delete',
+    'class_teaching', 'class_teaching:read', 'class_teaching:create', 'class_teaching:update', 'class_teaching:delete',
+    'ai', 'ai:chat', 'ai:text2sql'
+) AND p.deleted_at IS NULL
+WHERE r.code = 'teacher' AND r.deleted_at IS NULL;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 验证结果
+SELECT 
+    p1.id,
+    p1.name,
+    p1.code,
+    p1.type,
+    p1.parent_id,
+    p2.name as parent_name
+FROM sys_permission p1
+LEFT JOIN sys_permission p2 ON p1.parent_id = p2.id
+WHERE p1.deleted_at IS NULL
+ORDER BY COALESCE(p1.parent_id, p1.id), p1.id;

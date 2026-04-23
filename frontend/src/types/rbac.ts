@@ -49,6 +49,25 @@ export interface UserPasswordResetPayload {
   new_password: string;
 }
 
+export interface AuditLogItem {
+  id: number;
+  module: string;
+  action: string;
+  operator_id?: number | null;
+  operator_username: string;
+  target_type: string;
+  target_id: string;
+  detail_json?: string | null;
+  created_at: string;
+}
+
+export interface AuditLogPageResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  records: AuditLogItem[];
+}
+
 export interface Role {
   id: number;
   name: string;

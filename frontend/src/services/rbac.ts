@@ -5,6 +5,7 @@ import {
   assertPositiveIntArray,
 } from "../lib/validators";
 import type {
+  AuditLogPageResponse,
   Permission,
   PermissionCreatePayload,
   PermissionTreeNode,
@@ -102,4 +103,31 @@ export async function listUsers(params?: {
   const queryString = queryParams.toString();
   const url = queryString ? `/api/user/list?${queryString}` : "/api/user/list";
   return unwrapResponse<UserPageResponse>(http.get(url));
+}
+
+export async function listAuditLogs(params?: {
+  page?: number;
+  page_size?: number;
+  module?: string;
+  action?: string;
+  operator_id?: number;
+  target_type?: string;
+  target_id?: string;
+  start_time?: string;
+  end_time?: string;
+}) {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", params.page.toString());
+  if (params?.page_size) queryParams.append("page_size", params.page_size.toString());
+  if (params?.module) queryParams.append("module", params.module);
+  if (params?.action) queryParams.append("action", params.action);
+  if (params?.operator_id) queryParams.append("operator_id", params.operator_id.toString());
+  if (params?.target_type) queryParams.append("target_type", params.target_type);
+  if (params?.target_id) queryParams.append("target_id", params.target_id);
+  if (params?.start_time) queryParams.append("start_time", params.start_time);
+  if (params?.end_time) queryParams.append("end_time", params.end_time);
+  
+  const queryString = queryParams.toString();
+  const url = queryString ? `/api/rbac/audit-logs?${queryString}` : "/api/rbac/audit-logs";
+  return unwrapResponse<AuditLogPageResponse>(http.get(url));
 }

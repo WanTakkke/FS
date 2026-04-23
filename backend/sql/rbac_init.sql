@@ -84,57 +84,167 @@ WHERE NOT EXISTS (
 );
 
 -- 初始化权限点（接口级）
+-- 先创建权限组节点（parent_id为NULL，type='group'）
 INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
-SELECT NULL, p.name, p.code, 'api', NOW(), NOW(), NULL
+SELECT NULL, p.name, p.code, 'group', NOW(), NOW(), NULL
 FROM (
-    SELECT '角色查询' AS name, 'rbac:role:read' AS code
-    UNION ALL SELECT '角色创建', 'rbac:role:create'
-    UNION ALL SELECT '角色更新', 'rbac:role:update'
-    UNION ALL SELECT '角色删除', 'rbac:role:delete'
-    UNION ALL SELECT '权限查询', 'rbac:permission:read'
-    UNION ALL SELECT '权限创建', 'rbac:permission:create'
-    UNION ALL SELECT '权限更新', 'rbac:permission:update'
-    UNION ALL SELECT '权限删除', 'rbac:permission:delete'
-    UNION ALL SELECT '审计日志查询', 'rbac:audit:read'
-    UNION ALL SELECT '用户绑定角色', 'rbac:user:bind_role'
-    UNION ALL SELECT '角色绑定权限', 'rbac:role:bind_permission'
-    UNION ALL SELECT '用户查询', 'user:read'
-    UNION ALL SELECT '用户更新', 'user:update'
-    UNION ALL SELECT '用户状态管理', 'user:status'
-    UNION ALL SELECT '用户密码重置', 'user:password:reset'
-    UNION ALL SELECT '用户删除', 'user:delete'
-    UNION ALL SELECT '学生查询', 'student:read'
-    UNION ALL SELECT '学生新增', 'student:create'
-    UNION ALL SELECT '学生更新', 'student:update'
-    UNION ALL SELECT '学生删除', 'student:delete'
-    UNION ALL SELECT '成绩查询', 'score:read'
-    UNION ALL SELECT '成绩新增', 'score:create'
-    UNION ALL SELECT '成绩更新', 'score:update'
-    UNION ALL SELECT '成绩删除', 'score:delete'
-    UNION ALL SELECT '班级查询', 'class:read'
-    UNION ALL SELECT '班级新增', 'class:create'
-    UNION ALL SELECT '班级更新', 'class:update'
-    UNION ALL SELECT '班级删除', 'class:delete'
-    UNION ALL SELECT '课程查询', 'course:read'
-    UNION ALL SELECT '课程新增', 'course:create'
-    UNION ALL SELECT '课程更新', 'course:update'
-    UNION ALL SELECT '课程删除', 'course:delete'
-    UNION ALL SELECT '就业查询', 'employment:read'
-    UNION ALL SELECT '就业新增', 'employment:create'
-    UNION ALL SELECT '就业更新', 'employment:update'
-    UNION ALL SELECT '就业删除', 'employment:delete'
-    UNION ALL SELECT '班级授课查询', 'class_teaching:read'
-    UNION ALL SELECT '班级授课新增', 'class_teaching:create'
-    UNION ALL SELECT '班级授课更新', 'class_teaching:update'
-    UNION ALL SELECT '班级授课删除', 'class_teaching:delete'
-    UNION ALL SELECT 'AI对话', 'ai:chat'
-    UNION ALL SELECT 'AI Text2SQL', 'ai:text2sql'
+    SELECT 'RBAC管理' AS name, 'rbac' AS code
+    UNION ALL SELECT '用户管理', 'user'
+    UNION ALL SELECT '学生管理', 'student'
+    UNION ALL SELECT '成绩管理', 'score'
+    UNION ALL SELECT '班级管理', 'class'
+    UNION ALL SELECT '课程管理', 'course'
+    UNION ALL SELECT '就业管理', 'employment'
+    UNION ALL SELECT '班级授课管理', 'class_teaching'
+    UNION ALL SELECT 'AI助手', 'ai'
 ) p
 WHERE NOT EXISTS (
     SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
 );
 
--- 赋权：admin 拥有全部权限
+-- 创建子权限（parent_id指向权限组，type='api'）
+-- RBAC管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'rbac' AS group_code, '角色查询' AS name, 'rbac:role:read' AS code
+    UNION ALL SELECT 'rbac', '角色创建', 'rbac:role:create'
+    UNION ALL SELECT 'rbac', '角色更新', 'rbac:role:update'
+    UNION ALL SELECT 'rbac', '角色删除', 'rbac:role:delete'
+    UNION ALL SELECT 'rbac', '权限查询', 'rbac:permission:read'
+    UNION ALL SELECT 'rbac', '权限创建', 'rbac:permission:create'
+    UNION ALL SELECT 'rbac', '权限更新', 'rbac:permission:update'
+    UNION ALL SELECT 'rbac', '权限删除', 'rbac:permission:delete'
+    UNION ALL SELECT 'rbac', '审计日志查询', 'rbac:audit:read'
+    UNION ALL SELECT 'rbac', '用户绑定角色', 'rbac:user:bind_role'
+    UNION ALL SELECT 'rbac', '角色绑定权限', 'rbac:role:bind_permission'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 用户管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'user' AS group_code, '用户查询' AS name, 'user:read' AS code
+    UNION ALL SELECT 'user', '用户更新', 'user:update'
+    UNION ALL SELECT 'user', '用户状态管理', 'user:status'
+    UNION ALL SELECT 'user', '用户密码重置', 'user:password:reset'
+    UNION ALL SELECT 'user', '用户删除', 'user:delete'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 学生管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'student' AS group_code, '学生查询' AS name, 'student:read' AS code
+    UNION ALL SELECT 'student', '学生新增', 'student:create'
+    UNION ALL SELECT 'student', '学生更新', 'student:update'
+    UNION ALL SELECT 'student', '学生删除', 'student:delete'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 成绩管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'score' AS group_code, '成绩查询' AS name, 'score:read' AS code
+    UNION ALL SELECT 'score', '成绩新增', 'score:create'
+    UNION ALL SELECT 'score', '成绩更新', 'score:update'
+    UNION ALL SELECT 'score', '成绩删除', 'score:delete'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 班级管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'class' AS group_code, '班级查询' AS name, 'class:read' AS code
+    UNION ALL SELECT 'class', '班级新增', 'class:create'
+    UNION ALL SELECT 'class', '班级更新', 'class:update'
+    UNION ALL SELECT 'class', '班级删除', 'class:delete'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 课程管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'course' AS group_code, '课程查询' AS name, 'course:read' AS code
+    UNION ALL SELECT 'course', '课程新增', 'course:create'
+    UNION ALL SELECT 'course', '课程更新', 'course:update'
+    UNION ALL SELECT 'course', '课程删除', 'course:delete'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 就业管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'employment' AS group_code, '就业查询' AS name, 'employment:read' AS code
+    UNION ALL SELECT 'employment', '就业新增', 'employment:create'
+    UNION ALL SELECT 'employment', '就业更新', 'employment:update'
+    UNION ALL SELECT 'employment', '就业删除', 'employment:delete'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 班级授课管理子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'class_teaching' AS group_code, '班级授课查询' AS name, 'class_teaching:read' AS code
+    UNION ALL SELECT 'class_teaching', '班级授课新增', 'class_teaching:create'
+    UNION ALL SELECT 'class_teaching', '班级授课更新', 'class_teaching:update'
+    UNION ALL SELECT 'class_teaching', '班级授课删除', 'class_teaching:delete'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- AI助手子权限
+INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+SELECT pg.id, p.name, p.code, 'api', NOW(), NOW(), NULL
+FROM sys_permission pg
+JOIN (
+    SELECT 'ai' AS group_code, 'AI对话' AS name, 'ai:chat' AS code
+    UNION ALL SELECT 'ai', 'AI Text2SQL', 'ai:text2sql'
+) p ON pg.code = p.group_code
+WHERE pg.deleted_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_permission sp WHERE sp.code = p.code AND sp.deleted_at IS NULL
+);
+
+-- 赋权：admin 拥有全部权限（包括权限组节点和子权限）
 INSERT INTO sys_role_permission(role_id, permission_id, created_at)
 SELECT r.id, p.id, NOW()
 FROM sys_role r
@@ -142,18 +252,18 @@ JOIN sys_permission p ON p.deleted_at IS NULL
 LEFT JOIN sys_role_permission rp ON rp.role_id = r.id AND rp.permission_id = p.id
 WHERE r.code = 'admin' AND r.deleted_at IS NULL AND rp.role_id IS NULL;
 
--- 赋权：teacher 拥有主要业务模块权限（不含RBAC管理）
+-- 赋权：teacher 拥有主要业务模块权限（包含权限组节点）
 INSERT INTO sys_role_permission(role_id, permission_id, created_at)
 SELECT r.id, p.id, NOW()
 FROM sys_role r
 JOIN sys_permission p ON p.code IN (
-    'student:read', 'student:create', 'student:update', 'student:delete',
-    'score:read', 'score:create', 'score:update', 'score:delete',
-    'class:read', 'class:create', 'class:update', 'class:delete',
-    'course:read', 'course:create', 'course:update', 'course:delete',
-    'employment:read', 'employment:create', 'employment:update', 'employment:delete',
-    'class_teaching:read', 'class_teaching:create', 'class_teaching:update', 'class_teaching:delete',
-    'ai:chat', 'ai:text2sql'
+    'student', 'student:read', 'student:create', 'student:update', 'student:delete',
+    'score', 'score:read', 'score:create', 'score:update', 'score:delete',
+    'class', 'class:read', 'class:create', 'class:update', 'class:delete',
+    'course', 'course:read', 'course:create', 'course:update', 'course:delete',
+    'employment', 'employment:read', 'employment:create', 'employment:update', 'employment:delete',
+    'class_teaching', 'class_teaching:read', 'class_teaching:create', 'class_teaching:update', 'class_teaching:delete',
+    'ai', 'ai:chat', 'ai:text2sql'
 ) AND p.deleted_at IS NULL
 LEFT JOIN sys_role_permission rp ON rp.role_id = r.id AND rp.permission_id = p.id
 WHERE r.code = 'teacher' AND r.deleted_at IS NULL AND rp.role_id IS NULL;

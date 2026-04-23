@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "../layouts/AppLayout";
 import { AiPage } from "../pages/AiPage";
+import { AuditLogPage } from "../pages/AuditLogPage";
 import { ClassPage } from "../pages/ClassPage";
 import { ClassTeachingPage } from "../pages/ClassTeachingPage";
 import { CoursePage } from "../pages/CoursePage";
@@ -43,8 +44,9 @@ export function AppRouter() {
         <Route path="/teaching" element={<ClassTeachingPage />} />
         <Route path="/courses" element={<CoursePage />} />
         <Route path="/ai" element={<AiPage />} />
-        <Route path="/rbac" element={<RbacPage />} />
         <Route path="/users" element={<UserPage />} />
+        <Route path="/rbac" element={<RbacPage />} />
+        <Route path="/audit-logs" element={<AuditLogPage />} />
       </Route>
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<Navigate to="/404" replace />} />
