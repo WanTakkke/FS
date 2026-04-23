@@ -37,6 +37,15 @@ export interface Permission {
   type: string;
 }
 
+export interface PermissionTreeNode {
+  id: number;
+  parent_id?: number | null;
+  name: string;
+  code: string;
+  type: string;
+  children: PermissionTreeNode[];
+}
+
 export interface PermissionCreatePayload {
   parent_id?: number | null;
   name: string;

@@ -9,12 +9,14 @@ from schema.rbacSchema import (
     AuditLogPageResponse,
     PermissionCreateRequest,
     PermissionResponse,
+    PermissionTreeNode,
     PermissionUpdateRequest,
     RoleCreateRequest,
     RoleResponse,
     RoleUpdateRequest,
     UserRolePermissionResponse,
 )
+from utils.permission_tree import build_permission_tree, get_all_descendant_ids
 
 
 def _operator_fields(operator: CurrentUserResponse | None) -> tuple[int | None, str]:
@@ -113,6 +115,12 @@ async def delete_role(db: AsyncSession, role_id: int, operator: CurrentUserRespo
 async def list_permissions(db: AsyncSession):
     result = await rbacMapper.list_permissions(db)
     return [PermissionResponse.model_validate(item) for item in result]
+
+
+async def get_permission_tree(db: AsyncSession):
+    result = await rbacMapper.list_permissions(db)
+    tree_data = build_permission_tree([dict(item) for item in result])
+    return [PermissionTreeNode.model_validate(node) for node in tree_data]
 
 
 async def create_permission(
@@ -265,7 +273,19 @@ async def bind_role_permissions(
     role = await rbacMapper.get_role_by_id(db, role_id)
     if not role:
         raise ValueError(f"角色ID {role_id} 不存在")
-    await rbacMapper.replace_role_permissions(db, role_id=role_id, permission_ids=permission_ids)
+    
+    all_permissions = await rbacMapper.list_permissions(db)
+    expanded_permission_ids = set(permission_ids)
+    
+    for perm_id in permission_ids:
+        perm = next((p for p in all_permissions if p["id"] == perm_id), None)
+        if perm and perm.get("type") == "group":
+            descendant_ids = get_all_descendant_ids(perm_id, [dict(p) for p in all_permissions])
+            expanded_permission_ids.update(descendant_ids)
+    
+    await rbacMapper.replace_role_permissions(
+        db, role_id=role_id, permission_ids=list(expanded_permission_ids)
+    )
     await userMapper.bump_users_perm_version_by_role(db, role_id)
     operator_id, operator_name = _operator_fields(operator)
     await rbacMapper.create_audit_log(

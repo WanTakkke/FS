@@ -7,6 +7,7 @@ import {
 import type {
   Permission,
   PermissionCreatePayload,
+  PermissionTreeNode,
   PermissionUpdatePayload,
   Role,
   RoleCreatePayload,
@@ -41,6 +42,10 @@ export async function deleteRole(roleId: number) {
 
 export async function listPermissions() {
   return unwrapResponse<Permission[]>(http.get("/api/rbac/permissions"));
+}
+
+export async function getPermissionTree() {
+  return unwrapResponse<PermissionTreeNode[]>(http.get("/api/rbac/permissions/tree"));
 }
 
 export async function createPermission(payload: PermissionCreatePayload) {

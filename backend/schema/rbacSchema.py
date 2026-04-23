@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -46,6 +47,18 @@ class PermissionResponse(BaseModel):
     name: str
     code: str
     type: str
+
+
+class PermissionTreeNode(BaseModel):
+    id: int
+    parent_id: int | None = None
+    name: str
+    code: str
+    type: str
+    children: list["PermissionTreeNode"] = Field(default_factory=list)
+
+
+PermissionTreeNode.model_rebuild()
 
 
 class UserRoleBindRequest(BaseModel):

@@ -8,6 +8,7 @@ from schema.rbacSchema import (
     AuditLogPageResponse,
     PermissionCreateRequest,
     PermissionResponse,
+    PermissionTreeNode,
     PermissionUpdateRequest,
     RoleCreateRequest,
     RolePermissionBindRequest,
@@ -81,6 +82,13 @@ async def delete_role(
 async def list_permissions(db: AsyncSession = Depends(get_db)):
     """权限列表"""
     result = await rbacService.list_permissions(db)
+    return BaseResponse.success(data=result)
+
+
+@rbac_router.get("/permissions/tree", response_model=BaseResponse[List[PermissionTreeNode]], dependencies=[Depends(require_permission("rbac:permission:read"))])
+async def get_permission_tree(db: AsyncSession = Depends(get_db)):
+    """权限树（树形结构）"""
+    result = await rbacService.get_permission_tree(db)
     return BaseResponse.success(data=result)
 
 
