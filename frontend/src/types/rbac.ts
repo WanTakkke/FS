@@ -37,6 +37,20 @@ export interface Permission {
   type: string;
 }
 
+export interface PermissionCreatePayload {
+  parent_id?: number | null;
+  name: string;
+  code: string;
+  type?: string;
+}
+
+export interface PermissionUpdatePayload {
+  permission_id: number;
+  parent_id?: number | null;
+  name?: string;
+  type?: string;
+}
+
 export interface RoleCreatePayload {
   name: string;
   code: string;

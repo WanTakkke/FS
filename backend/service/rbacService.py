@@ -7,7 +7,9 @@ from schema.userSchema import CurrentUserResponse
 from schema.rbacSchema import (
     AuditLogItemResponse,
     AuditLogPageResponse,
+    PermissionCreateRequest,
     PermissionResponse,
+    PermissionUpdateRequest,
     RoleCreateRequest,
     RoleResponse,
     RoleUpdateRequest,
@@ -111,6 +113,111 @@ async def delete_role(db: AsyncSession, role_id: int, operator: CurrentUserRespo
 async def list_permissions(db: AsyncSession):
     result = await rbacMapper.list_permissions(db)
     return [PermissionResponse.model_validate(item) for item in result]
+
+
+async def create_permission(
+    db: AsyncSession,
+    perm_data: PermissionCreateRequest,
+    operator: CurrentUserResponse | None = None,
+):
+    exists = await rbacMapper.get_permission_by_code(db, perm_data.code)
+    if exists:
+        raise ValueError(f"权限编码 {perm_data.code} 已存在")
+    if perm_data.parent_id is not None:
+        parent = await rbacMapper.get_permission_by_id(db, perm_data.parent_id)
+        if not parent:
+            raise ValueError(f"父权限ID {perm_data.parent_id} 不存在")
+    result = await rbacMapper.create_permission(
+        db,
+        parent_id=perm_data.parent_id,
+        name=perm_data.name,
+        code=perm_data.code,
+        perm_type=perm_data.type,
+    )
+    operator_id, operator_name = _operator_fields(operator)
+    await rbacMapper.create_audit_log(
+        db,
+        module="rbac",
+        action="permission.create",
+        operator_id=operator_id,
+        operator_username=operator_name,
+        target_type="permission",
+        target_id=str(result["id"]),
+        detail_json=json.dumps(
+            {
+                "parent_id": perm_data.parent_id,
+                "name": perm_data.name,
+                "code": perm_data.code,
+                "type": perm_data.type,
+            },
+            ensure_ascii=False,
+        ),
+    )
+    return PermissionResponse.model_validate(result)
+
+
+async def update_permission(
+    db: AsyncSession,
+    perm_data: PermissionUpdateRequest,
+    operator: CurrentUserResponse | None = None,
+):
+    exists = await rbacMapper.get_permission_by_id(db, perm_data.permission_id)
+    if not exists:
+        raise ValueError(f"权限ID {perm_data.permission_id} 不存在")
+    if perm_data.parent_id is not None:
+        if perm_data.parent_id == perm_data.permission_id:
+            raise ValueError("父权限不能是自己")
+        parent = await rbacMapper.get_permission_by_id(db, perm_data.parent_id)
+        if not parent:
+            raise ValueError(f"父权限ID {perm_data.parent_id} 不存在")
+    result = await rbacMapper.update_permission(
+        db,
+        permission_id=perm_data.permission_id,
+        parent_id=perm_data.parent_id,
+        name=perm_data.name,
+        perm_type=perm_data.type,
+    )
+    operator_id, operator_name = _operator_fields(operator)
+    await rbacMapper.create_audit_log(
+        db,
+        module="rbac",
+        action="permission.update",
+        operator_id=operator_id,
+        operator_username=operator_name,
+        target_type="permission",
+        target_id=str(perm_data.permission_id),
+        detail_json=json.dumps(
+            {
+                "parent_id": perm_data.parent_id,
+                "name": perm_data.name,
+                "type": perm_data.type,
+            },
+            ensure_ascii=False,
+        ),
+    )
+    return PermissionResponse.model_validate(result)
+
+
+async def delete_permission(db: AsyncSession, permission_id: int, operator: CurrentUserResponse | None = None):
+    exists = await rbacMapper.get_permission_by_id(db, permission_id)
+    if not exists:
+        raise ValueError(f"权限ID {permission_id} 不存在")
+    role_count = await rbacMapper.count_roles_by_permission(db, permission_id)
+    if role_count > 0:
+        raise ValueError(f"该权限已关联 {role_count} 个角色，禁止删除")
+    result = await rbacMapper.soft_delete_permission(db, permission_id)
+    operator_id, operator_name = _operator_fields(operator)
+    await rbacMapper.create_audit_log(
+        db,
+        module="rbac",
+        action="permission.delete",
+        operator_id=operator_id,
+        operator_username=operator_name,
+        target_type="permission",
+        target_id=str(permission_id),
+        detail_json=json.dumps({"deleted": True}, ensure_ascii=False),
+    )
+    return result
 
 
 async def bind_user_roles(

@@ -6,6 +6,8 @@ import {
 } from "../lib/validators";
 import type {
   Permission,
+  PermissionCreatePayload,
+  PermissionUpdatePayload,
   Role,
   RoleCreatePayload,
   RolePermissionBindPayload,
@@ -39,6 +41,25 @@ export async function deleteRole(roleId: number) {
 
 export async function listPermissions() {
   return unwrapResponse<Permission[]>(http.get("/api/rbac/permissions"));
+}
+
+export async function createPermission(payload: PermissionCreatePayload) {
+  assertNonEmptyString(payload.name, "权限名称");
+  assertNonEmptyString(payload.code, "权限编码");
+  return unwrapResponse<Permission>(http.post("/api/rbac/permissions", payload));
+}
+
+export async function updatePermission(payload: PermissionUpdatePayload) {
+  assertPositiveInt(payload.permission_id, "权限ID");
+  if (!payload.parent_id && !payload.name && !payload.type) {
+    throw new Error("至少填写一个更新字段");
+  }
+  return unwrapResponse<Permission>(http.post("/api/rbac/permissions/update", payload));
+}
+
+export async function deletePermission(permissionId: number) {
+  assertPositiveInt(permissionId, "权限ID");
+  return unwrapResponse<boolean>(http.delete(`/api/rbac/permissions/${permissionId}`));
 }
 
 export async function bindUserRoles(payload: UserRoleBindPayload) {

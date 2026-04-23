@@ -24,6 +24,20 @@ class RoleResponse(BaseModel):
     description: str | None = None
 
 
+class PermissionCreateRequest(BaseModel):
+    parent_id: int | None = None
+    name: str = Field(min_length=1, max_length=64)
+    code: str = Field(min_length=1, max_length=64)
+    type: str = Field(default="api", max_length=32)
+
+
+class PermissionUpdateRequest(BaseModel):
+    permission_id: int
+    parent_id: int | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=64)
+    type: str | None = Field(default=None, max_length=32)
+
+
 class PermissionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

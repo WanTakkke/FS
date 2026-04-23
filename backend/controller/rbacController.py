@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config.db_config import get_db
 from schema.rbacSchema import (
     AuditLogPageResponse,
+    PermissionCreateRequest,
     PermissionResponse,
+    PermissionUpdateRequest,
     RoleCreateRequest,
     RolePermissionBindRequest,
     RoleResponse,
@@ -80,6 +82,51 @@ async def list_permissions(db: AsyncSession = Depends(get_db)):
     """权限列表"""
     result = await rbacService.list_permissions(db)
     return BaseResponse.success(data=result)
+
+
+@rbac_router.post("/permissions", response_model=BaseResponse[PermissionResponse], dependencies=[Depends(require_permission("rbac:permission:create"))])
+async def create_permission(
+    perm_data: PermissionCreateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    """创建权限点"""
+    try:
+        result = await rbacService.create_permission(db, perm_data, operator=current_user)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("创建权限失败: code=%s reason=%s", perm_data.code, str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@rbac_router.post("/permissions/update", response_model=BaseResponse[PermissionResponse], dependencies=[Depends(require_permission("rbac:permission:update"))])
+async def update_permission(
+    perm_data: PermissionUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    """更新权限点"""
+    try:
+        result = await rbacService.update_permission(db, perm_data, operator=current_user)
+        return BaseResponse.success(data=result)
+    except ValueError as e:
+        logger.warning("更新权限失败: permission_id=%s reason=%s", perm_data.permission_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))
+
+
+@rbac_router.delete("/permissions/{permission_id}", response_model=BaseResponse[bool], dependencies=[Depends(require_permission("rbac:permission:delete"))])
+async def delete_permission(
+    permission_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUserResponse = Depends(get_current_user),
+):
+    """删除权限点"""
+    try:
+        await rbacService.delete_permission(db, permission_id, operator=current_user)
+        return BaseResponse.success()
+    except ValueError as e:
+        logger.warning("删除权限失败: permission_id=%s reason=%s", permission_id, str(e))
+        return BaseResponse.error(code=400, message=str(e))
 
 
 @rbac_router.post("/users/roles", response_model=BaseResponse[bool], dependencies=[Depends(require_permission("rbac:user:bind_role"))])

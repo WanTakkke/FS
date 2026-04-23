@@ -107,6 +107,114 @@ async def list_permissions(db: AsyncSession):
     return result.mappings().all()
 
 
+async def get_permission_by_id(db: AsyncSession, permission_id: int):
+    result = await db.execute(
+        text(
+            """
+            SELECT id, parent_id, name, code, type
+            FROM sys_permission
+            WHERE id = :permission_id AND deleted_at IS NULL
+            """
+        ),
+        {"permission_id": permission_id},
+    )
+    return result.mappings().first()
+
+
+async def get_permission_by_code(db: AsyncSession, code: str):
+    result = await db.execute(
+        text(
+            """
+            SELECT id, parent_id, name, code, type
+            FROM sys_permission
+            WHERE code = :code AND deleted_at IS NULL
+            """
+        ),
+        {"code": code},
+    )
+    return result.mappings().first()
+
+
+async def create_permission(
+    db: AsyncSession,
+    parent_id: int | None,
+    name: str,
+    code: str,
+    perm_type: str,
+):
+    await db.execute(
+        text(
+            """
+            INSERT INTO sys_permission(parent_id, name, code, type, created_at, updated_at, deleted_at)
+            VALUES(:parent_id, :name, :code, :type, NOW(), NOW(), NULL)
+            """
+        ),
+        {"parent_id": parent_id, "name": name, "code": code, "type": perm_type},
+    )
+    await db.commit()
+    return await get_permission_by_code(db, code)
+
+
+async def update_permission(
+    db: AsyncSession,
+    permission_id: int,
+    parent_id: int | None,
+    name: str | None,
+    perm_type: str | None,
+):
+    updates: list[str] = []
+    params: dict[str, object] = {"permission_id": permission_id}
+    if parent_id is not None:
+        updates.append("parent_id = :parent_id")
+        params["parent_id"] = parent_id
+    if name is not None:
+        updates.append("name = :name")
+        params["name"] = name
+    if perm_type is not None:
+        updates.append("type = :type")
+        params["type"] = perm_type
+    if not updates:
+        return await get_permission_by_id(db, permission_id)
+    updates.append("updated_at = NOW()")
+    sql = f"UPDATE sys_permission SET {', '.join(updates)} WHERE id = :permission_id AND deleted_at IS NULL"
+    await db.execute(text(sql), params)
+    await db.commit()
+    return await get_permission_by_id(db, permission_id)
+
+
+async def soft_delete_permission(db: AsyncSession, permission_id: int):
+    await db.execute(
+        text(
+            """
+            UPDATE sys_permission
+            SET deleted_at = NOW(), updated_at = NOW()
+            WHERE id = :permission_id AND deleted_at IS NULL
+            """
+        ),
+        {"permission_id": permission_id},
+    )
+    await db.execute(
+        text("DELETE FROM sys_role_permission WHERE permission_id = :permission_id"),
+        {"permission_id": permission_id},
+    )
+    await db.commit()
+    return True
+
+
+async def count_roles_by_permission(db: AsyncSession, permission_id: int) -> int:
+    result = await db.execute(
+        text(
+            """
+            SELECT COUNT(DISTINCT role_id)
+            FROM sys_role_permission
+            WHERE permission_id = :permission_id
+            """
+        ),
+        {"permission_id": permission_id},
+    )
+    return int(result.scalar_one() or 0)
+
+
 async def get_user_roles(db: AsyncSession, user_id: int):
     result = await db.execute(
         text(
